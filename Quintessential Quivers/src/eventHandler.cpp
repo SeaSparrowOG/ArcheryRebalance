@@ -38,39 +38,29 @@ namespace Events {
 		}
 
 		//Ammo or weapon equiped. Evaluate wether we should update the Actor's damage.
-		RE::Actor* theActorPtr = nullptr;
 
-		if (a_event->actor->As<RE::Actor>()) {
-
-			theActorPtr = a_event->actor->As<RE::Actor>();
-		}
-		else {
+		if (!a_event->actor->As<RE::Actor>()) {
 
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
+		RE::Actor* theActorPtr = a_event->actor->As<RE::Actor>();
 
-		RE::TESObjectWEAP* theActorsWeaponPtr = nullptr;
-
-		if (theActorPtr->GetEquippedObject(false)->As<RE::TESObjectWEAP>()) {
-
-			theActorsWeaponPtr = theActorPtr->GetEquippedObject(false)->As<RE::TESObjectWEAP>();
-		}
-		else {
+		if (!theActorPtr->GetEquippedObject(false)->As<RE::TESObjectWEAP>()) {
 
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		RE::TESAmmo* theActorsAmmoPtr = nullptr;
+		RE::TESObjectWEAP* theActorsWeaponPtr = theActorPtr->GetEquippedObject(false)->As<RE::TESObjectWEAP>();
 
-		if (theActorPtr->GetCurrentAmmo()) {
+		 nullptr;
 
-			theActorsAmmoPtr = theActorPtr->GetCurrentAmmo();
-		}
-		else {
+		if (!theActorPtr->GetCurrentAmmo()) {
 
 			return RE::BSEventNotifyControl::kContinue;
 		}
+
+		RE::TESAmmo* theActorsAmmoPtr = theActorPtr->GetCurrentAmmo();
 
 		//Actor has both a weapon and ammo equipped. Evaluate whether or not they match.
 		bool weaponMatchingAmmo = false;
