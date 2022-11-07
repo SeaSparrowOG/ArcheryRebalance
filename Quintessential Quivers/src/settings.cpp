@@ -86,7 +86,7 @@ namespace QQSettings {
 		ini.SetBoolValue("Settings", "bGetShouldAdjustArrows", true, ";If true, Quintessential Quivers will scan through all available arrows and adjust their damage.");
 		ini.SetBoolValue("Settings", "bGetShouldAdjustBolts", true, ";If true, Quintessential Quivers will scan through all available bolts and adjust their damage.");
 		ini.SetBoolValue("Settings", "bGetShouldAdjustBows", true, ";If true, Quintessential Quivers will scan through all available bows and adjust their damage.");
-		ini.SetBoolValue("Settings", "bGetShouldAdjustCrossbows", true, ";If true, Quintessential Quivers will scan through all available arrows and adjust their damage.");
+		ini.SetBoolValue("Settings", "bGetShouldAdjustCrossbows", true, ";If true, Quintessential Quivers will scan through all available crossbows and adjust their damage.");
 
 		ini.SaveFile(path);
 	}

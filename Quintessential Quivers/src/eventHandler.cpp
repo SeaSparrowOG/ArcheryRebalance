@@ -46,6 +46,11 @@ namespace Events {
 
 		RE::Actor* theActorPtr = a_event->actor->As<RE::Actor>();
 
+		if (!theActorPtr->GetEquippedObject(false)) {
+
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
 		if (!theActorPtr->GetEquippedObject(false)->As<RE::TESObjectWEAP>()) {
 
 			return RE::BSEventNotifyControl::kContinue;
@@ -69,7 +74,7 @@ namespace Events {
 
 			weaponMatchingAmmo = true;
 		}
-		else if (theActorsWeaponPtr->IsCrossbow() && theActorsAmmoPtr->IsBolt()) {
+		else if (theActorsWeaponPtr->IsCrossbow() && !(theActorsAmmoPtr->GetRuntimeData().data.flags & RE::AMMO_DATA::Flag::kNonBolt)) {
 
 			weaponMatchingAmmo = true;
 		}
@@ -78,9 +83,9 @@ namespace Events {
 
 			return RE::BSEventNotifyControl::kContinue;
 		}
-
+		
 		theActorPtr->AsActorValueOwner()->SetBaseActorValue(RE::ActorValue::kMarksmanModifier, theActorsWeaponPtr->GetAttackDamage() + theActorsAmmoPtr->GetRuntimeData().data.damage);
-		theActorPtr->AsActorValueOwner()->SetBaseActorValue(RE::ActorValue::kMarksmanPowerModifier, 0);
+		theActorPtr->AsActorValueOwner()->SetBaseActorValue(RE::ActorValue::kMarksmanPowerModifier, theActorPtr->AsActorValueOwner()->GetActorValue(RE::ActorValue::kMarksmanModifier) - theActorsAmmoPtr->GetRuntimeData().data.damage);
 
 		//If the actor is the player, we need to update the damage indicator.
 		if (theActorPtr->IsPlayerRef()) {
