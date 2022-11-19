@@ -1,7 +1,10 @@
-A simple SKSE plugin designed to make arrow choice important.
-With this plugin installed, the damage of arrows/bolts will be
-added to the base damage of bows/crossbows.
+A simple plugin with a single goal: To make archery more balanced. 
+As such, it is being nerfed, but in an interesting way. Now, bow draw speed
+relies exclusively on a function of the wielder's archery skill and the 
+bow's weight.
 
-REQUIREMENTS: 
-1. Address Library for SKSE Plugins
-2. SKSE64
+How to build:
+1. Clone the repository.
+2. Open the folder with VS.
+3. Choose Release-MSVC.
+4. Build.
