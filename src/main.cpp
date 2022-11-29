@@ -115,5 +115,10 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface * a_
         Events::Register();
     }
 
+    if (ARSettings::Settings::CheckBoolSetting("bQuintessentialQuivers", "Settings")) {
+
+        Events::RegisterQQ();
+    }
+
     return true;
 }

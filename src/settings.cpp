@@ -60,6 +60,11 @@ namespace ARSettings {
 			return false;
 		}
 
+		if (!ini.KeyExists("Settings", "bQuintessentialQuivers")) {
+
+			return false;
+		}
+
 		return true;
 	}
 
@@ -71,15 +76,15 @@ namespace ARSettings {
 
 		ini.Delete("Settings", NULL);
 		
-		ini.SetBoolValue("Settings", "bGetShouldBuffArrows",       true, ";Applies a formula to change the overall damage of all arrows in the game.");
-		ini.SetBoolValue("Settings", "bGetShouldBuffBolts",        true, ";Applies a formula to change the overall damage of all bolts in the game.");
-		ini.SetBoolValue("Settings", "bGetShouldNerfBows",         true, ";Applies a formula to change the overall damage of all bows in the game.");
-		ini.SetBoolValue("Settings", "bGetShouldEqualizeBows",     true, ";Makes the draw speed of all bows in the game 1.0");
-		ini.SetBoolValue("Settings", "bGetShouldNerfCrossbows",    true, ";Applies a formula to change the overall damage of all crossbows in the game.");
-		ini.SetBoolValue("Settings", "bGetShouldBoltsPierceArmor", true, ";Bolts will natively ignore armor.");
-		ini.SetBoolValue("Settings", "bShouldAdjustProjectiles",   true, ";The heavier the bow, the faster the projectile will fire.");
-		ini.SetBoolValue("Settings", "bShouldAdjustBowDrawSpeed",  true, ";The heavier the bow, the harder it will be to draw.");
-
+		ini.SetBoolValue("Settings", "bGetShouldBuffArrows",       false, ";Applies a formula to change the overall damage of all arrows in the game.");
+		ini.SetBoolValue("Settings", "bGetShouldBuffBolts",        false, ";Applies a formula to change the overall damage of all bolts in the game.");
+		ini.SetBoolValue("Settings", "bGetShouldNerfBows",         false, ";Applies a formula to change the overall damage of all bows in the game.");
+		ini.SetBoolValue("Settings", "bGetShouldEqualizeBows",     true,  ";Makes the draw speed of all bows in the game 1.0");
+		ini.SetBoolValue("Settings", "bGetShouldNerfCrossbows",    false, ";Applies a formula to change the overall damage of all crossbows in the game.");
+		ini.SetBoolValue("Settings", "bGetShouldBoltsPierceArmor", true,  ";Bolts will natively ignore armor.");
+		ini.SetBoolValue("Settings", "bShouldAdjustProjectiles",   true,  ";The heavier the bow, the faster the projectile will fire.");
+		ini.SetBoolValue("Settings", "bShouldAdjustBowDrawSpeed",  true,  ";The heavier the bow, the harder it will be to draw.");
+		ini.SetBoolValue("Settings", "bQuintessentialQuivers",     false, ";The original functionality of the mod. Best to leave this off.");
 		ini.SaveFile(path);
 	}
 
