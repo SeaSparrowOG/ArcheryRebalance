@@ -39,7 +39,10 @@ namespace {
                     //In here, do the Arrow/Bolt/Bow/Crossbow changes.
                     if (ARSettings::Settings::CheckBoolSetting("bGetShouldBuffArrows", "Settings")) {
 
-                        if (!Adjuster::AdjustArrows()) {
+                        bool bShouldAdjustSpeed = ARSettings::Settings::CheckBoolSetting("bAdjustArrowSpeed", "Settings");
+                        float fNewArrowSpeed = ARSettings::Settings::CheckFloatSetting("fNewArrowSpeed", "Settings");
+
+                        if (!Adjuster::AdjustArrows(bShouldAdjustSpeed, fNewArrowSpeed)) {
 
                             SKSE::stl::report_and_error("Archery Rebalance: Failed to adjust arrows while the setting was turned on in the ini.");
                         }
@@ -47,7 +50,10 @@ namespace {
 
                     if (ARSettings::Settings::CheckBoolSetting("bGetShouldBuffBolts", "Settings")) {
 
-                        if (!Adjuster::AdjustBolts(ARSettings::Settings::CheckBoolSetting("bGetShouldBoltsPierceArmor", "Settings"))) {
+                        bool bShouldAdjustBoltSpeed = ARSettings::Settings::CheckBoolSetting("bAdjustBoltSpeed", "Settings");
+                        float fNewBoltSpeed = ARSettings::Settings::CheckFloatSetting("fNewBoltSpeed", "Settings");
+
+                        if (!Adjuster::AdjustBolts(ARSettings::Settings::CheckBoolSetting("bGetShouldBoltsPierceArmor", "Settings"), bShouldAdjustBoltSpeed, fNewBoltSpeed)) {
 
                             SKSE::stl::report_and_error("Archery Rebalance: Failed to adjust bolts while the setting was turned on in the ini.");
                         }
@@ -58,14 +64,6 @@ namespace {
                         if (!Adjuster::AdjustBows(ARSettings::Settings::CheckBoolSetting("bGetShouldEqualizeBows", "Settings"))) {
 
                             SKSE::stl::report_and_error("Archery Rebalance: Failed to adjust bows while the setting was turned on in the ini.");
-                        }
-                    }
-
-                    if (ARSettings::Settings::CheckBoolSetting("bGetShouldNerfBows", "Settings")) {
-
-                        if (!Adjuster::AdjustCrossbows()) {
-
-                            SKSE::stl::report_and_error("Archery Rebalance: Failed to adjust crossbows while the setting was turned on in the ini.");
                         }
                     }
 
@@ -93,7 +91,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface * a_
 {
     //Logging and INI setup
     InitializeLogging();
-    if (!ARSettings::Settings::INIExists()) {
+    if (!ARSettings::Settings::INIExists()) { 
 
         SKSE::log::info("INI not found. Generating...");
         ARSettings::Settings::CreateINI();

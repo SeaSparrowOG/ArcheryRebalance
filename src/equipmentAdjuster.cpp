@@ -2,7 +2,7 @@
 
 namespace Adjuster {
 
-	bool AdjustArrows() {
+	bool AdjustArrows(bool a_adjustSpeed, float a_newArrowSpeed) {
 
 		SKSE::log::info("=============================================================");
 		SKSE::log::info("=================Beginning Arrow Adjustment==================");
@@ -22,6 +22,15 @@ namespace Adjuster {
 						foundArrow->GetRuntimeData().data.damage = floor(std::pow(originalDamage, 2.3) * 0.01 + std::pow(originalDamage, 1.3) * 0.1 + 5.3);
 						SKSE::log::info("{} Damage {} -> {}", foundArrow->GetName(), originalDamage, foundArrow->GetRuntimeData().data.damage);
 						totalArrows++;
+
+						//Adjust speed
+						if (a_adjustSpeed) {
+
+							float fOriginalSpeed = foundArrow->GetRuntimeData().data.projectile->data.speed;
+
+							foundArrow->GetRuntimeData().data.projectile->data.speed = a_newArrowSpeed;
+							SKSE::log::info("{} Speed {} -> {}", foundArrow->GetName(), fOriginalSpeed, foundArrow->GetRuntimeData().data.projectile->data.speed);
+						}
 					}
 				}
 			}
@@ -37,7 +46,7 @@ namespace Adjuster {
 		return true;
 	}
 
-	bool AdjustBolts(bool a_PierceArmor) {
+	bool AdjustBolts(bool a_PierceArmor, bool a_adjustSpeed, float a_newBoltSpeed) {
 
 		SKSE::log::info("=============================================================");
 		SKSE::log::info("==================Beginning Bolt Adjustment==================");
@@ -64,6 +73,15 @@ namespace Adjuster {
 							foundBolt->GetRuntimeData().data.damage = floor(std::pow(originalDamage, 2.3) * 0.01 + std::pow(originalDamage, 1.3) * 0.1 + 5.3);
 							SKSE::log::info("{} Damage: {} -> {}, Ignores Armor: {}", foundBolt->GetName(), originalDamage, foundBolt->GetRuntimeData().data.damage, foundBolt->IgnoresNormalWeaponResistance());
 							totalBolts++;
+
+							//Adjust speed
+							if (a_adjustSpeed) {
+
+								float fOriginalSpeed = foundBolt->GetRuntimeData().data.projectile->data.speed;
+
+								foundBolt->GetRuntimeData().data.projectile->data.speed = a_newBoltSpeed;
+								SKSE::log::info("{} Speed {} -> {}", foundBolt->GetName(), fOriginalSpeed, foundBolt->GetRuntimeData().data.projectile->data.speed);
+							}
 						}
 					}
 				}

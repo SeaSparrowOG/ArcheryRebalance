@@ -109,12 +109,23 @@ namespace Events {
 			fActorsBowWeight = 5.0;
 		}
 
+		if (theActorsWeaponPtr->IsBound()) {
 
-		theActorsWeaponPtr->weaponData.speed = 1.2 - pow(theActorsWeaponPtr->GetWeight() - 4.9, 1.5) / (1.5 * theActorPtr->AsActorValueOwner()->GetActorValue(RE::ActorValue::kArchery));
+			fActorsBowWeight = 15.0;
+		}
+
+		float fArchery = theActorPtr->AsActorValueOwner()->GetActorValue(RE::ActorValue::kArchery);
+
+		theActorsWeaponPtr->weaponData.speed = fArchery/200 + pow(fArchery/100, 2) - (pow(fActorsBowWeight - 15,3)) / 750;
 
 		if (theActorsWeaponPtr->weaponData.speed < 0.4) {
 
 			theActorsWeaponPtr->weaponData.speed = 0.4;
+		}
+
+		if (theActorsWeaponPtr->weaponData.speed > 1.5) {
+
+			theActorsWeaponPtr->weaponData.speed = 1.5;
 		}
 
 		return RE::BSEventNotifyControl::kContinue;

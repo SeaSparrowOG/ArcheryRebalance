@@ -65,6 +65,26 @@ namespace ARSettings {
 			return false;
 		}
 
+		if (!ini.KeyExists("Settings", "bAdjustArrowSpeed")) {
+
+			return false;
+		}
+
+		if (!ini.KeyExists("Settings", "bAdjustBoltSpeed")) {
+
+			return false;
+		}
+
+		if (!ini.KeyExists("Settings", "fNewBoltSpeed")) {
+
+			return false;
+		}
+
+		if (!ini.KeyExists("Settings", "fNewArrowSpeed")) {
+
+			return false;
+		}
+		
 		return true;
 	}
 
@@ -76,8 +96,12 @@ namespace ARSettings {
 
 		ini.Delete("Settings", NULL);
 		
-		ini.SetBoolValue("Settings", "bGetShouldBuffArrows",       false, ";Applies a formula to change the overall damage of all arrows in the game.");
-		ini.SetBoolValue("Settings", "bGetShouldBuffBolts",        false, ";Applies a formula to change the overall damage of all bolts in the game.");
+		ini.SetBoolValue("Settings", "bGetShouldBuffArrows",       true,  ";Applies a formula to change the overall damage of all arrows in the game.");
+		ini.SetBoolValue("Settings", "bAdjustArrowSpeed",          true,  ";If bGetShouldBuffArrows is set to true, buffs the overall arrow speed.");
+		ini.SetLongValue("Settings", "fNewArrowSpeed",             3000.0,";If bAdjustArrowSpeed is set to true, this is the new projectile base speed.");
+		ini.SetBoolValue("Settings", "bGetShouldBuffBolts",        true,  ";Applies a formula to change the overall damage of all bolts in the game.");
+		ini.SetBoolValue("Settings", "bAdjustBoltSpeed",           true,  ";If bGetShouldBuffBolts is set to true, buffs the overall arrow speed.");
+		ini.SetLongValue("Settings", "fNewBoltSpeed",              4500.0,";If bAdjustBoltSpeed is set to true, this is the new projectile base speed.");
 		ini.SetBoolValue("Settings", "bGetShouldNerfBows",         false, ";Applies a formula to change the overall damage of all bows in the game.");
 		ini.SetBoolValue("Settings", "bGetShouldEqualizeBows",     true,  ";Makes the draw speed of all bows in the game 1.0");
 		ini.SetBoolValue("Settings", "bGetShouldNerfCrossbows",    false, ";Applies a formula to change the overall damage of all crossbows in the game.");
@@ -95,5 +119,14 @@ namespace ARSettings {
 		ini.LoadFile(path);
 
 		return ini.GetBoolValue(a_section, a_key, true);
+	}
+
+	float Settings::CheckFloatSetting(const char* a_key, const char* a_section) {
+
+		CSimpleIniA ini;
+		ini.SetUnicode();
+		ini.LoadFile(path);
+
+		return ini.GetLongValue(a_section, a_key, 3000.0);
 	}
 }

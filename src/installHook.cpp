@@ -11,9 +11,20 @@ namespace Hook {
 				const auto projectileBase = base ? base->As<RE::BGSProjectile>() : nullptr;
 				const auto weaponSource = a_projectile->GetProjectileRuntimeData().weaponSource;
 
-				if (projectileBase && weaponSource) {
+				bool bIsBound = false;
+
+				if (weaponSource->weaponData.flags2 & RE::TESObjectWEAP::Data::Flag2::kBoundWeapon) {
+
+					bIsBound = true;
+				}
+
+				if (projectileBase && weaponSource && !bIsBound) {
 
 					a_projectile->GetProjectileRuntimeData().linearVelocity *= weaponSource->GetWeight() / 13 + 0.5;
+				}
+				else if (projectileBase && weaponSource && bIsBound) {
+
+					a_projectile->GetProjectileRuntimeData().linearVelocity *= 1.5;
 				}
 			}
 
