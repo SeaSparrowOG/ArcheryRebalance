@@ -18,5 +18,6 @@ namespace ARSettings {
 		static bool CheckINI();
 		static void CreateINI();
 		static bool CheckBoolSetting(const char* a_key, const char* a_section);
+		static float CheckFloatSetting(const char* a_key, const char* a_section);
 	};
 }
