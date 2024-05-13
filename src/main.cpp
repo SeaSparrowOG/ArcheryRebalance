@@ -30,13 +30,6 @@ namespace {
                 _loggerError("Failed to read settings.");
                 break;
             }
-
-            if (!AdjustWeapons::AdjustWeapons()) {
-                _loggerError("Failed to adjust weapons.");
-                break;
-            }
-
-            EventHandler::OnEquip::GetSingleton()->RegisterListener();
             break;
         default:
             break;

@@ -10,24 +10,31 @@ namespace AdjustWeapons {
 	class BowAdjuster : public clib_util::singleton::ISingleton<BowAdjuster> {
 	public:
 		bool Adjust();
-	private:
 	};
 
-	class CrossbowAdjuster : public clib_util::singleton::ISingleton<BowAdjuster> {
+	class ArrowAdjuster : public clib_util::singleton::ISingleton<ArrowAdjuster> {
 	public:
 		bool Adjust();
+		void UpdateArrowDamageSettings(bool a_adjustArrowDamage, double a_additionalDamage);
+		void UpdateArrowSpeedSettings(bool a_adjustArrowSpeed, double a_newArrowSpeed);
+
 	private:
+		bool   bBuffArrowDamage;
+		bool   bIncreaseArrowSpeed;
+		double fAdditionalArrowDamage;
+		double fNewArrowSpeed;
 	};
 
-	class ArrowAdjuster : public clib_util::singleton::ISingleton<BowAdjuster> {
+	class BoltAdjuster : public clib_util::singleton::ISingleton<BoltAdjuster> {
 	public:
 		bool Adjust();
-	private:
-	};
+		void UpdateBoltDamageSettings(bool a_adjustBoltDamage, double a_additionalDamage);
+		void UpdateBoltSpeedSettings(bool a_adjustBoltSpeed, double a_newBoltSpeed);
 
-	class BoltAdjuster : public clib_util::singleton::ISingleton<BowAdjuster> {
-	public:
-		bool Adjust();
 	private:
+		bool   bBuffBoltDamage;
+		bool   bIncreaseBoltSpeed;
+		double fAdditionalBoltDamage;
+		double fNewBoltSpeed;
 	};
 }
