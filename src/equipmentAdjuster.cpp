@@ -126,7 +126,7 @@ namespace AdjustWeapons {
 
 			if (this->bBuffArrowDamage) {
 				ammoData.damage += this->fAdditionalArrowDamage;
-				bAdjustedDamage = false;
+				bAdjustedDamage = true;
 			}
 
 			if (!ammoName.empty() && (bAdjustedDamage || bAdjustedSpeed)) {
@@ -138,16 +138,18 @@ namespace AdjustWeapons {
 			}
 		}
 
-		_loggerInfo("");
-		_loggerInfo("================================================================");
-		_loggerInfo("Arrow Adjustment Report:");
-		_loggerInfo("New speed: {}.", this->fNewArrowSpeed);
-		_loggerInfo("Additional damage: {}.", this->fAdditionalArrowDamage);
-		for (auto& arrowInfo : adjustedArrows) {
-			_loggerInfo("    >{}:", arrowInfo.first);
-			_loggerInfo("        Adjusted Speed: {}, Adjusted Damage: {}.", arrowInfo.second.first, arrowInfo.second.second);
+		if (!adjustedArrows.empty()) {
+			_loggerInfo("");
+			_loggerInfo("================================================================");
+			_loggerInfo("Arrow Adjustment Report:");
+			_loggerInfo("New speed: {}.", this->fNewArrowSpeed);
+			_loggerInfo("Additional damage: {}.", this->fAdditionalArrowDamage);
+			for (auto& arrowInfo : adjustedArrows) {
+				_loggerInfo("    >{}:", arrowInfo.first);
+				_loggerInfo("        Adjusted Speed: {}, Adjusted Damage: {}.", arrowInfo.second.first, arrowInfo.second.second);
+			}
+			_loggerInfo("================================================================");
 		}
-		_loggerInfo("================================================================");
 		return true;
 	}
 

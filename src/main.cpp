@@ -1,6 +1,4 @@
-#include "eventHandler.h"
 #include "settings.h"
-#include "equipmentAdjuster.h"
 #include "installHook.h"
 
 #include <stddef.h>

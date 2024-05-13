@@ -10,16 +10,19 @@ namespace {
 			"bIncreaseArrowSpeed",
 			"bIncreaseBoltSpeed",
 			"bAdjustBowDrawSpeed",
+			"bAccountConjuration",
 
 			"fAdditionalArrowDamage",
 			"fAdditionalBoltDamage",
 			"fNewArrowSpeed",
-			"fNewBoltSpeed"
+			"fNewBoltSpeed",
+			"fConjurationWeight"
 		};
+		int keyNumber = sizeof(generalKeys) / sizeof(generalKeys[0]);
 
 		std::list<CSimpleIniA::Entry> keyHolder;
 		a_ini->GetAllKeys("General", keyHolder);
-		if (std::size(generalKeys) != keyHolder.size()) return true;
+		if (keyNumber != keyHolder.size()) return true;
 
 		for (auto* key : generalKeys) {
 			if (!a_ini->KeyExists("General", key)) return true;
@@ -47,10 +50,10 @@ namespace {
 				ini.Delete("General", NULL);
 				ini.SaveFile(f.c_str());
 
-				ini.SetBoolValue("General", "bBuffArrowDamage", true,
+				ini.SetBoolValue("General", "bBuffArrowDamage", false,
 					";Increases arrow damage by a specific amount.");
 
-				ini.SetBoolValue("General", "bBuffBoltDamage", true,
+				ini.SetBoolValue("General", "bBuffBoltDamage", false,
 					";Increases bolt damage by a specific amount.");
 
 				ini.SetBoolValue("General", "bIncreaseArrowSpeed", true,
@@ -61,6 +64,9 @@ namespace {
 
 				ini.SetBoolValue("General", "bAdjustBowDrawSpeed", true,
 					";Main functionality of the mod, allows for dynamic draw speed based on bow weight and archery skill.");
+
+				ini.SetBoolValue("General", "bAccountConjuration", false,
+					";If using a bound weapon, accounts for conjuration skill in addition to archery for dynamic draw speed. No effect if bAdjustBowDrawSpeed is set to false");
 
 
 				ini.SetDoubleValue("General", "fAdditionalArrowDamage", 0.0f,
@@ -74,6 +80,9 @@ namespace {
 
 				ini.SetDoubleValue("General", "fNewBoltSpeed", 8500.0f,
 					";The new bolt speed. No effect if bIncreaseBoltSpeed is set to false.");
+
+				ini.SetDoubleValue("General", "fConjurationWeight", 0.6f,
+					";The weight given to conjuration when calculating dynamic draw speed. Must be between 0.0 and 1.0, no effect if bAccountConjuration is set to false.");
 				ini.SaveFile(f.c_str());
 			}
 		}
@@ -113,8 +122,10 @@ namespace Settings {
 		double fNewBoltSpeed = ini.GetDoubleValue("General", "fNewBoltSpeed");
 
 		bool bEnableMainFunctionality = ini.GetBoolValue("General", "bAdjustBowDrawSpeed");
+		bool bAccountForConjurationSkill = ini.GetBoolValue("General", "bAccountConjuration");
+		double fConjurationSkillWeight = ini.GetDoubleValue("General", "fConjurationWeight");
 
-		onEquipListener->UpdateDrawSpeedSetting(bEnableMainFunctionality);
+		onEquipListener->UpdateDrawSpeedSetting(bEnableMainFunctionality, bAccountForConjurationSkill, fConjurationSkillWeight);
 		boltAdjuster->UpdateBoltSpeedSettings(bAdjustBoltSpeed, fNewBoltSpeed);
 		boltAdjuster->UpdateBoltDamageSettings(bBuffBolts, fAdditionalBoltDamage);
 		arrowAdjuster->UpdateArrowDamageSettings(bBuffArrows, fAdditionalArrowDamage);
@@ -124,6 +135,7 @@ namespace Settings {
 			_loggerError("Failed to adjust weapons.");
 			return false;
 		}
+		EventHandler::OnEquip::GetSingleton()->RegisterListener();
 		return true;
 	}
 }
