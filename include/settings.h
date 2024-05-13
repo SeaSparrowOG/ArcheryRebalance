@@ -1,7 +1,5 @@
 #pragma once
 
-#include <SimpleIni.h>
-
 /*
 This file reads the associated INI, or creates it if not found. 
 The ini contains a single group called "settings" and controls

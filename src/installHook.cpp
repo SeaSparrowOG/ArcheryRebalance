@@ -9,7 +9,7 @@ namespace Hook {
 			if (a_projectile) {
 				const auto base = a_projectile->GetBaseObject();
 				const auto projectileBase = base ? base->As<RE::BGSProjectile>() : nullptr;
-				const auto weaponSource = a_projectile->GetProjectileRuntimeData().weaponSource;
+				const auto weaponSource = a_projectile->weaponSource;
 
 				bool bIsBound = false;
 
@@ -20,11 +20,11 @@ namespace Hook {
 
 				if (projectileBase && weaponSource && !bIsBound) {
 
-					a_projectile->GetProjectileRuntimeData().linearVelocity *= weaponSource->GetWeight() / 13 + 0.5;
+					a_projectile->linearVelocity *= weaponSource->GetWeight() / 13 + 0.5;
 				}
 				else if (projectileBase && weaponSource && bIsBound) {
 
-					a_projectile->GetProjectileRuntimeData().linearVelocity *= 1.5;
+					a_projectile->linearVelocity *= 1.5;
 				}
 			}
 
@@ -34,38 +34,8 @@ namespace Hook {
 	};
 
 	void Install() {
-
-		REL::Module::Runtime runtimeVersion = REL::Module::GetRuntime();
-		int offset;
-
-		switch (runtimeVersion) {
-
-		case REL::Module::Runtime::AE:
-
-			offset = 0x79D;
-			break;
-
-		case REL::Module::Runtime::SE:
-
-			offset = 0x3CB;
-			break;
-
-		case REL::Module::Runtime::VR:
-
-			offset = 0x3A8;
-			break;
-
-		default:
-
-			SKSE::stl::report_and_fail("Archery Rebalance: Cannot find Skyrim version. Aborting load...");
-			break;
-
-		}
-
-		REL::Relocation<std::uintptr_t> target{ RELOCATION_ID(43030, 44222), REL::VariantOffset(0x3CB, 0x79D, 0x3A8) };
-
+		REL::Relocation<std::uintptr_t> target{ RELOCATION_ID(43030, 44222), OFFSET_3(0x3CB, 0x79D, 0x3A8) };
 		stl::write_thunk_call<UpdateCombatThreat>(target.address());
-
 		SKSE::log::info("Managed to hook.");
 	}
 }

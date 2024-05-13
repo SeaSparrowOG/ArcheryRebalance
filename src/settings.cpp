@@ -1,5 +1,4 @@
 #include "settings.h"
-#include "simpleIni.h"
 
 constexpr auto path = L"Data/SKSE/Plugins/ArcheryRebalance.ini";
 

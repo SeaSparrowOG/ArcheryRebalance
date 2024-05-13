@@ -7,27 +7,21 @@
 
 namespace {
     
-    void InitializeLogging() {
-        auto path = SKSE::log::log_directory();
-        if (!path) {
-            SKSE::stl::report_and_fail("Unable to lookup SKSE logs directory.");
-        }
-        *path /= SKSE::PluginDeclaration::GetSingleton()->GetName();
-        *path += L".log";
+    void SetupLog() {
+        auto logsFolder = SKSE::log::log_directory();
+        if (!logsFolder) SKSE::stl::report_and_fail("SKSE log_directory not provided, logs disabled.");
 
-        std::shared_ptr<spdlog::logger> log;
-        if (IsDebuggerPresent()) {
-            log = std::make_shared<spdlog::logger>(
-                "Global", std::make_shared<spdlog::sinks::msvc_sink_mt>());
-        } else {
-            log = std::make_shared<spdlog::logger>(
-                "Global", std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true));
-        }
-        log->set_level(spdlog::level::info);
-        log->flush_on(spdlog::level::info);
+        auto pluginName = Version::PROJECT;
+        auto logFilePath = *logsFolder / std::format("{}.log", pluginName);
+        auto fileLoggerPtr = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFilePath.string(), true);
+        auto loggerPtr = std::make_shared<spdlog::logger>("log", std::move(fileLoggerPtr));
 
-        spdlog::set_default_logger(std::move(log));
-        spdlog::set_pattern("[%H:%M:%S.%e]: %v");
+        spdlog::set_default_logger(std::move(loggerPtr));
+        spdlog::set_level(spdlog::level::info);
+        spdlog::flush_on(spdlog::level::info);
+
+        //Pattern
+        spdlog::set_pattern("%v");
     }
 
     
@@ -43,8 +37,7 @@ namespace {
                         float fNewArrowSpeed = ARSettings::Settings::CheckFloatSetting("fNewArrowSpeed", "Settings");
 
                         if (!Adjuster::AdjustArrows(bShouldAdjustSpeed, fNewArrowSpeed)) {
-
-                            SKSE::stl::report_and_error("Archery Rebalance: Failed to adjust arrows while the setting was turned on in the ini.");
+                            SKSE::stl::report_and_fail("Archery Rebalance: Failed to adjust arrows while the setting was turned on in the ini.");
                         }
                     }
 
@@ -55,7 +48,7 @@ namespace {
 
                         if (!Adjuster::AdjustBolts(ARSettings::Settings::CheckBoolSetting("bGetShouldBoltsPierceArmor", "Settings"), bShouldAdjustBoltSpeed, fNewBoltSpeed)) {
 
-                            SKSE::stl::report_and_error("Archery Rebalance: Failed to adjust bolts while the setting was turned on in the ini.");
+                            SKSE::stl::report_and_fail("Archery Rebalance: Failed to adjust bolts while the setting was turned on in the ini.");
                         }
                     }
 
@@ -63,7 +56,7 @@ namespace {
 
                         if (!Adjuster::AdjustBows(ARSettings::Settings::CheckBoolSetting("bGetShouldEqualizeBows", "Settings"))) {
 
-                            SKSE::stl::report_and_error("Archery Rebalance: Failed to adjust bows while the setting was turned on in the ini.");
+                            SKSE::stl::report_and_fail("Archery Rebalance: Failed to adjust bows while the setting was turned on in the ini.");
                         }
                     }
 
@@ -86,12 +79,55 @@ namespace {
     }
 }
 
-
-extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface * a_skse)
+#ifdef SKYRIM_AE
+extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
+    SKSE::PluginVersionData v;
+    v.PluginVersion({ Version::MAJOR, Version::MINOR, Version::PATCH });
+    v.PluginName(Version::PROJECT);
+    v.AuthorName("SeaSparrow");
+    v.UsesAddressLibrary();
+    v.UsesUpdatedStructs();
+    v.CompatibleVersions({
+        SKSE::RUNTIME_1_6_1130,
+        _1_6_1170 });
+    return v;
+    }();
+#else 
+extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface * a_skse, SKSE::PluginInfo * a_info)
 {
-    //Logging and INI setup
-    InitializeLogging();
-    if (!ARSettings::Settings::INIExists()) { 
+    a_info->infoVersion = SKSE::PluginInfo::kVersion;
+    a_info->name = "EnchantmentArtExtender";
+    a_info->version = 1;
+
+    const auto ver = a_skse->RuntimeVersion();
+    if (ver
+#	ifndef SKYRIMVR
+        < SKSE::RUNTIME_1_5_39
+#	else
+        > SKSE::RUNTIME_VR_1_4_15_1
+#	endif
+        ) {
+        SKSE::log::critical(FMT_STRING("Unsupported runtime version {}"), ver.string());
+        return false;
+    }
+
+    return true;
+}
+#endif
+
+extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface * a_skse) {
+    SetupLog();
+    _loggerInfo("Starting up {}.", Version::PROJECT);
+    _loggerInfo("Plugin Version: {}.{}.{}", Version::MAJOR, Version::MINOR, Version::PATCH);
+    _loggerInfo("Version build:");
+
+#ifdef SKYRIM_AE
+    _loggerInfo("    >Latest Version.");
+#else
+    _loggerInfo("    >1.5 Version. Do not report ANY issues with this version.");
+#endif
+
+    if (!ARSettings::Settings::INIExists()) {
 
         SKSE::log::info("INI not found. Generating...");
         ARSettings::Settings::CreateINI();
@@ -102,8 +138,8 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface * a_
 
             SKSE::log::info("INI found but is incorrect. Rebuilding...");
             ARSettings::Settings::CreateINI();
-        }
     }
+}
 
     SKSE::Init(a_skse);
     InitializeMessaging();

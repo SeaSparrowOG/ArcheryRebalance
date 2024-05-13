@@ -12,24 +12,23 @@ namespace Adjuster {
 		if (const auto dataHandler = RE::TESDataHandler::GetSingleton(); dataHandler) {
 
 			for (const auto& foundArrow : dataHandler->GetFormArray<RE::TESAmmo>()) {
+				if ((foundArrow->data.flags & RE::AMMO_DATA::Flag::kNonBolt) && !(foundArrow->data.flags & RE::AMMO_DATA::Flag::kNonPlayable)) {
 
-				if ((foundArrow->GetRuntimeData().data.flags & RE::AMMO_DATA::Flag::kNonBolt) && !(foundArrow->GetRuntimeData().data.flags & RE::AMMO_DATA::Flag::kNonPlayable)) {
-
-					if (!(foundArrow->GetRuntimeData().data.damage <= 0)) {
+					if (!(foundArrow->data.damage <= 0)) {
 
 						//Formula Here.
-						float originalDamage = foundArrow->GetRuntimeData().data.damage;
-						foundArrow->GetRuntimeData().data.damage = floor(std::pow(originalDamage, 2.3) * 0.01 + std::pow(originalDamage, 1.3) * 0.1 + 5.3);
-						SKSE::log::info("{} Damage {} -> {}", foundArrow->GetName(), originalDamage, foundArrow->GetRuntimeData().data.damage);
+						float originalDamage = foundArrow->data.damage;
+						foundArrow->data.damage = floor(std::pow(originalDamage, 2.3) * 0.01 + std::pow(originalDamage, 1.3) * 0.1 + 5.3);
+						SKSE::log::info("{} Damage {} -> {}", foundArrow->GetName(), originalDamage, foundArrow->data.damage);
 						totalArrows++;
 
 						//Adjust speed
 						if (a_adjustSpeed) {
 
-							float fOriginalSpeed = foundArrow->GetRuntimeData().data.projectile->data.speed;
+							float fOriginalSpeed = foundArrow->data.projectile->data.speed;
 
-							foundArrow->GetRuntimeData().data.projectile->data.speed = a_newArrowSpeed;
-							SKSE::log::info("{} Speed {} -> {}", foundArrow->GetName(), fOriginalSpeed, foundArrow->GetRuntimeData().data.projectile->data.speed);
+							foundArrow->data.projectile->data.speed = a_newArrowSpeed;
+							SKSE::log::info("{} Speed {} -> {}", foundArrow->GetName(), fOriginalSpeed, foundArrow->data.projectile->data.speed);
 						}
 					}
 				}
@@ -57,30 +56,30 @@ namespace Adjuster {
 
 			for (const auto& foundBolt : dataHandler->GetFormArray<RE::TESAmmo>()) {
 
-				if (!(foundBolt->GetRuntimeData().data.flags & RE::AMMO_DATA::Flag::kNonBolt) && !(foundBolt->GetRuntimeData().data.flags & RE::AMMO_DATA::Flag::kNonPlayable)) {
+				if (!(foundBolt->data.flags & RE::AMMO_DATA::Flag::kNonBolt) && !(foundBolt->data.flags & RE::AMMO_DATA::Flag::kNonPlayable)) {
 
-					if (!(foundBolt->GetRuntimeData().data.flags == RE::AMMO_DATA::Flag::kNonPlayable)) {
+					if (!(foundBolt->data.flags == RE::AMMO_DATA::Flag::kNonPlayable)) {
 
-						if (!(foundBolt->GetRuntimeData().data.damage <= 0)) {
+						if (!(foundBolt->data.damage <= 0)) {
 							
-							float originalDamage = foundBolt->GetRuntimeData().data.damage;
+							float originalDamage = foundBolt->data.damage;
 
 							if (a_PierceArmor) {
 
-								foundBolt->GetRuntimeData().data.flags.set(RE::AMMO_DATA::Flag::kIgnoresNormalWeaponResistance);
+								foundBolt->data.flags.set(RE::AMMO_DATA::Flag::kIgnoresNormalWeaponResistance);
 							}
 
-							foundBolt->GetRuntimeData().data.damage = floor(std::pow(originalDamage, 2.3) * 0.01 + std::pow(originalDamage, 1.3) * 0.1 + 5.3);
-							SKSE::log::info("{} Damage: {} -> {}, Ignores Armor: {}", foundBolt->GetName(), originalDamage, foundBolt->GetRuntimeData().data.damage, foundBolt->IgnoresNormalWeaponResistance());
+							foundBolt->data.damage = floor(std::pow(originalDamage, 2.3) * 0.01 + std::pow(originalDamage, 1.3) * 0.1 + 5.3);
+							SKSE::log::info("{} Damage: {} -> {}, Ignores Armor: {}", foundBolt->GetName(), originalDamage, foundBolt->data.damage, foundBolt->IgnoresNormalWeaponResistance());
 							totalBolts++;
 
 							//Adjust speed
 							if (a_adjustSpeed) {
 
-								float fOriginalSpeed = foundBolt->GetRuntimeData().data.projectile->data.speed;
+								float fOriginalSpeed = foundBolt->data.projectile->data.speed;
 
-								foundBolt->GetRuntimeData().data.projectile->data.speed = a_newBoltSpeed;
-								SKSE::log::info("{} Speed {} -> {}", foundBolt->GetName(), fOriginalSpeed, foundBolt->GetRuntimeData().data.projectile->data.speed);
+								foundBolt->data.projectile->data.speed = a_newBoltSpeed;
+								SKSE::log::info("{} Speed {} -> {}", foundBolt->GetName(), fOriginalSpeed, foundBolt->data.projectile->data.speed);
 							}
 						}
 					}

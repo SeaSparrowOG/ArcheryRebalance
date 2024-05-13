@@ -82,7 +82,7 @@ namespace Events {
 		//Actor has both a weapon and ammo equipped. Evaluate whether or not they match.
 		bool weaponMatchingAmmo = false;
 
-		if (theActorsWeaponPtr->IsBow() && (theActorsAmmoPtr->GetRuntimeData().data.flags & RE::AMMO_DATA::Flag::kNonBolt)) {
+		if (theActorsWeaponPtr->IsBow() && (theActorsAmmoPtr->data.flags & RE::AMMO_DATA::Flag::kNonBolt)) {
 
 			weaponMatchingAmmo = true;
 		}
@@ -95,7 +95,7 @@ namespace Events {
 		//Actor equipped bow with matching ammo. Set the new draw speed:
 
 
-		float fActorsMarksmanSkill = theActorPtr->AsActorValueOwner()->GetActorValue(RE::ActorValue::kArchery);
+		float fActorsMarksmanSkill = theActorPtr->GetActorValue(RE::ActorValue::kArchery);
 
 		if (fActorsMarksmanSkill < 15.0) {
 
@@ -114,7 +114,7 @@ namespace Events {
 			fActorsBowWeight = 15.0;
 		}
 
-		float fArchery = theActorPtr->AsActorValueOwner()->GetActorValue(RE::ActorValue::kArchery);
+		float fArchery = theActorPtr->GetActorValue(RE::ActorValue::kArchery);
 
 		theActorsWeaponPtr->weaponData.speed = fArchery/200 + pow(fArchery/100, 2) - (pow(fActorsBowWeight - 15,3)) / 750;
 
@@ -147,7 +147,7 @@ namespace Events {
 				//Ammo unequipped. Check to see if it is a bolt or an arrow.
 				RE::TESAmmo* theUnequippedAmmo = theUnequippedObjectPtr->As<RE::TESAmmo>();
 
-				if (theUnequippedAmmo->GetRuntimeData().data.flags & RE::AMMO_DATA::Flag::kNonBolt) {
+				if (theUnequippedAmmo->data.flags & RE::AMMO_DATA::Flag::kNonBolt) {
 
 					//Arrow
 
@@ -173,7 +173,7 @@ namespace Events {
 						return RE::BSEventNotifyControl::kContinue;
 					}
 
-					theUnequippedActor->AsActorValueOwner()->SetBaseActorValue(RE::ActorValue::kMarksmanModifier, theUnequippedActor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kMarksmanModifier) - theUnequippedAmmo->GetRuntimeData().data.damage);
+					theUnequippedActor->SetBaseActorValue(RE::ActorValue::kMarksmanModifier, theUnequippedActor->GetActorValue(RE::ActorValue::kMarksmanModifier) - theUnequippedAmmo->data.damage);
 				}
 				else {
 
@@ -200,7 +200,7 @@ namespace Events {
 						return RE::BSEventNotifyControl::kContinue;
 					}
 
-					theUnequippedActor->AsActorValueOwner()->SetBaseActorValue(RE::ActorValue::kMarksmanModifier, theUnequippedActor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kMarksmanModifier) - theUnequippedAmmo->GetRuntimeData().data.damage);
+					theUnequippedActor->SetBaseActorValue(RE::ActorValue::kMarksmanModifier, theUnequippedActor->GetActorValue(RE::ActorValue::kMarksmanModifier) - theUnequippedAmmo->data.damage);
 				}
 			}
 			else if (theUnequippedObjectPtr->IsWeapon()) {
@@ -225,12 +225,12 @@ namespace Events {
 
 					RE::TESAmmo* theUnequippedAmmo = theUnequippedActor->GetCurrentAmmo();
 
-					if (!(theUnequippedAmmo->GetRuntimeData().data.flags & RE::AMMO_DATA::Flag::kNonBolt)) {
+					if (!(theUnequippedAmmo->data.flags & RE::AMMO_DATA::Flag::kNonBolt)) {
 
 						return RE::BSEventNotifyControl::kContinue;
 					}
 
-					theUnequippedActor->AsActorValueOwner()->SetBaseActorValue(RE::ActorValue::kMarksmanModifier, theUnequippedActor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kMarksmanModifier) - theUnequippedAmmo->GetRuntimeData().data.damage);
+					theUnequippedActor->SetBaseActorValue(RE::ActorValue::kMarksmanModifier, theUnequippedActor->GetActorValue(RE::ActorValue::kMarksmanModifier) - theUnequippedAmmo->data.damage);
 				}
 				else if (theUnequippedWeapon->IsCrossbow()) {
 
@@ -249,12 +249,12 @@ namespace Events {
 
 					RE::TESAmmo* theUnequippedAmmo = theUnequippedActor->GetCurrentAmmo();
 
-					if (theUnequippedAmmo->GetRuntimeData().data.flags & RE::AMMO_DATA::Flag::kNonBolt) {
+					if (theUnequippedAmmo->data.flags & RE::AMMO_DATA::Flag::kNonBolt) {
 
 						return RE::BSEventNotifyControl::kContinue;
 					}
 
-					theUnequippedActor->AsActorValueOwner()->SetBaseActorValue(RE::ActorValue::kMarksmanModifier, theUnequippedActor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kMarksmanModifier) - theUnequippedAmmo->GetRuntimeData().data.damage);
+					theUnequippedActor->SetBaseActorValue(RE::ActorValue::kMarksmanModifier, theUnequippedActor->GetActorValue(RE::ActorValue::kMarksmanModifier) - theUnequippedAmmo->data.damage);
 				}
 			}
 
@@ -309,11 +309,11 @@ namespace Events {
 		//Actor has both a weapon and ammo equipped. Evaluate whether or not they match.
 		bool weaponMatchingAmmo = false;
 
-		if (theActorsWeaponPtr->IsBow() && (theActorsAmmoPtr->GetRuntimeData().data.flags & RE::AMMO_DATA::Flag::kNonBolt)) {
+		if (theActorsWeaponPtr->IsBow() && (theActorsAmmoPtr->data.flags & RE::AMMO_DATA::Flag::kNonBolt)) {
 
 			weaponMatchingAmmo = true;
 		}
-		else if (theActorsWeaponPtr->IsCrossbow() && !(theActorsAmmoPtr->GetRuntimeData().data.flags & RE::AMMO_DATA::Flag::kNonBolt)) {
+		else if (theActorsWeaponPtr->IsCrossbow() && !(theActorsAmmoPtr->data.flags & RE::AMMO_DATA::Flag::kNonBolt)) {
 
 			weaponMatchingAmmo = true;
 		}
@@ -323,15 +323,15 @@ namespace Events {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		theActorPtr->AsActorValueOwner()->SetBaseActorValue(RE::ActorValue::kMarksmanModifier, theActorsWeaponPtr->GetAttackDamage() + theActorsAmmoPtr->GetRuntimeData().data.damage);
-		theActorPtr->AsActorValueOwner()->SetBaseActorValue(RE::ActorValue::kMarksmanPowerModifier, theActorPtr->AsActorValueOwner()->GetActorValue(RE::ActorValue::kMarksmanModifier) - theActorsAmmoPtr->GetRuntimeData().data.damage);
+		theActorPtr->SetBaseActorValue(RE::ActorValue::kMarksmanModifier, theActorsWeaponPtr->GetAttackDamage() + theActorsAmmoPtr->data.damage);
+		theActorPtr->SetBaseActorValue(RE::ActorValue::kMarksmanPowerModifier, theActorPtr->GetActorValue(RE::ActorValue::kMarksmanModifier) - theActorsAmmoPtr->data.damage);
 
 		//If the actor is the player, we need to update the damage indicator.
 		if (theActorPtr->IsPlayerRef()) {
 
 			RE::PlayerCharacter* thePlayer = RE::PlayerCharacter::GetSingleton();
 			float previousBowDamage = theActorsWeaponPtr->GetAttackDamage();
-			theActorsWeaponPtr->attackDamage += theActorsAmmoPtr->GetRuntimeData().data.damage;
+			theActorsWeaponPtr->attackDamage += theActorsAmmoPtr->data.damage;
 			float reportedDamage = thePlayer->GetDamage(thePlayer->GetEquippedEntryData(false));
 			RE::ConsoleLog::GetSingleton()->Print("Current Damage: %f", reportedDamage);
 			theActorsWeaponPtr->attackDamage = previousBowDamage;
