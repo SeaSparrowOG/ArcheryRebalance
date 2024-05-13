@@ -1,9 +1,33 @@
 #pragma once
 
-namespace Adjuster {
+namespace AdjustWeapons {
+	/*
+	Here for convinience. Adjusts weapons based on settings.  Should be called after settings are initialized
+	since that function fills in the classes' attributes.
+	*/
+	bool AdjustWeapons();
 
-	bool AdjustArrows(bool a_bShouldAdjustSpeed, float a_fNewSpeed);
-	bool AdjustBolts(bool a_PierceArmor, bool a_bShouldAdjustSpeed, float a_fNewSpeed);
-	bool AdjustBows(bool a_Equalize);
-	bool AdjustCrossbows();
+	class BowAdjuster : public clib_util::singleton::ISingleton<BowAdjuster> {
+	public:
+		bool Adjust();
+	private:
+	};
+
+	class CrossbowAdjuster : public clib_util::singleton::ISingleton<BowAdjuster> {
+	public:
+		bool Adjust();
+	private:
+	};
+
+	class ArrowAdjuster : public clib_util::singleton::ISingleton<BowAdjuster> {
+	public:
+		bool Adjust();
+	private:
+	};
+
+	class BoltAdjuster : public clib_util::singleton::ISingleton<BowAdjuster> {
+	public:
+		bool Adjust();
+	private:
+	};
 }

@@ -6,7 +6,6 @@
 #include <stddef.h>
 
 namespace {
-    
     void SetupLog() {
         auto logsFolder = SKSE::log::log_directory();
         if (!logsFolder) SKSE::stl::report_and_fail("SKSE log_directory not provided, logs disabled.");
@@ -24,57 +23,23 @@ namespace {
         spdlog::set_pattern("%v");
     }
 
-    
-    void InitializeMessaging() {
-        if (!SKSE::GetMessagingInterface()->RegisterListener([](SKSE::MessagingInterface::Message* message) {
-            switch (message->type) {
-                case SKSE::MessagingInterface::kDataLoaded:
-
-                    //In here, do the Arrow/Bolt/Bow/Crossbow changes.
-                    if (ARSettings::Settings::CheckBoolSetting("bGetShouldBuffArrows", "Settings")) {
-
-                        bool bShouldAdjustSpeed = ARSettings::Settings::CheckBoolSetting("bAdjustArrowSpeed", "Settings");
-                        float fNewArrowSpeed = ARSettings::Settings::CheckFloatSetting("fNewArrowSpeed", "Settings");
-
-                        if (!Adjuster::AdjustArrows(bShouldAdjustSpeed, fNewArrowSpeed)) {
-                            SKSE::stl::report_and_fail("Archery Rebalance: Failed to adjust arrows while the setting was turned on in the ini.");
-                        }
-                    }
-
-                    if (ARSettings::Settings::CheckBoolSetting("bGetShouldBuffBolts", "Settings")) {
-
-                        bool bShouldAdjustBoltSpeed = ARSettings::Settings::CheckBoolSetting("bAdjustBoltSpeed", "Settings");
-                        float fNewBoltSpeed = ARSettings::Settings::CheckFloatSetting("fNewBoltSpeed", "Settings");
-
-                        if (!Adjuster::AdjustBolts(ARSettings::Settings::CheckBoolSetting("bGetShouldBoltsPierceArmor", "Settings"), bShouldAdjustBoltSpeed, fNewBoltSpeed)) {
-
-                            SKSE::stl::report_and_fail("Archery Rebalance: Failed to adjust bolts while the setting was turned on in the ini.");
-                        }
-                    }
-
-                    if (ARSettings::Settings::CheckBoolSetting("bGetShouldNerfBows", "Settings")) {
-
-                        if (!Adjuster::AdjustBows(ARSettings::Settings::CheckBoolSetting("bGetShouldEqualizeBows", "Settings"))) {
-
-                            SKSE::stl::report_and_fail("Archery Rebalance: Failed to adjust bows while the setting was turned on in the ini.");
-                        }
-                    }
-
-                    break;
-
-                case SKSE::MessagingInterface::kPostLoad:
-
-                    if (ARSettings::Settings::CheckBoolSetting("bShouldAdjustProjectiles", "Settings")) {
-
-                        Hook::Install();
-                        SKSE::log::info("Hooked functions.");
-                    }
-                    break;
-
+    void MessageHandler(SKSE::MessagingInterface::Message* a_message) {
+        switch (a_message->type) {
+        case SKSE::MessagingInterface::kDataLoaded:
+            if (!Settings::InitializeSettings()) {
+                _loggerError("Failed to read settings.");
+                break;
             }
-        })) {
 
-            SKSE::stl::report_and_fail("Unable to register message listener.");
+            if (!AdjustWeapons::AdjustWeapons()) {
+                _loggerError("Failed to adjust weapons.");
+                break;
+            }
+
+            EventHandler::OnEquip::GetSingleton()->RegisterListener();
+            break;
+        default:
+            break;
         }
     }
 }
@@ -118,41 +83,16 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface * 
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface * a_skse) {
     SetupLog();
     _loggerInfo("Starting up {}.", Version::PROJECT);
-    _loggerInfo("Plugin Version: {}.{}.{}", Version::MAJOR, Version::MINOR, Version::PATCH);
-    _loggerInfo("Version build:");
-
+    _loggerInfo("Plugin Version: {}.{}.{} - Author: {}", Version::MAJOR, Version::MINOR, Version::PATCH, Version::PROJECT_AUTHOR);
+    _loggerInfo("Target Runtime");
 #ifdef SKYRIM_AE
-    _loggerInfo("    >Latest Version.");
+    _loggerInfo("    >Latest.");
 #else
-    _loggerInfo("    >1.5 Version. Do not report ANY issues with this version.");
+    _loggerInfo("    >1.5.97. Do not report ANY issues with this version.");
 #endif
 
-    if (!ARSettings::Settings::INIExists()) {
-
-        SKSE::log::info("INI not found. Generating...");
-        ARSettings::Settings::CreateINI();
-    }
-    else {
-
-        if (!ARSettings::Settings::CheckINI()) {
-
-            SKSE::log::info("INI found but is incorrect. Rebuilding...");
-            ARSettings::Settings::CreateINI();
-    }
-}
-
     SKSE::Init(a_skse);
-    InitializeMessaging();
-
-    if (ARSettings::Settings::CheckBoolSetting("bShouldAdjustBowDrawSpeed", "Settings")) {
-
-        Events::Register();
-    }
-
-    if (ARSettings::Settings::CheckBoolSetting("bQuintessentialQuivers", "Settings")) {
-
-        Events::RegisterQQ();
-    }
-
+    auto* messaging = SKSE::GetMessagingInterface();
+    messaging->RegisterListener(MessageHandler);
     return true;
 }

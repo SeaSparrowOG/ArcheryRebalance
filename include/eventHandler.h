@@ -1,32 +1,18 @@
 #pragma once
 
-namespace Events {
+namespace EventHandler {
+#define continueEvent RE::BSEventNotifyControl::kContinue
 
-	class OnEquipEventHandler : public RE::BSTEventSink<RE::TESEquipEvent> {
-
+	/*
+	Listens for actors equipping (bows and arrows) or (crossbows and bolts) and reacts appropriately.
+	*/
+	class OnEquip :
+		public RE::BSTEventSink<RE::TESEquipEvent>,
+		public clib_util::singleton::ISingleton<OnEquip> {
 	public:
-
-		static OnEquipEventHandler* GetSingleton();
-		static void                 RegisterListener();
-		RE::BSEventNotifyControl    ProcessEvent(const RE::TESEquipEvent* a_event, RE::BSTEventSource<RE::TESEquipEvent>* a_eventSource) override;
+		//Registers the listener, so it can actually respond to game events.
+		bool RegisterListener();
+	private:
+		RE::BSEventNotifyControl ProcessEvent(const RE::TESEquipEvent* a_event, RE::BSTEventSource<RE::TESEquipEvent>* a_eventSource) override;
 	};
-
-	class OnEquipQuintessentialHandler : public RE::BSTEventSink<RE::TESEquipEvent> {
-
-	public:
-
-		static OnEquipQuintessentialHandler* GetSingleton();
-		static void                          RegisterListener();
-		RE::BSEventNotifyControl             ProcessEvent(const RE::TESEquipEvent* a_event, RE::BSTEventSource<RE::TESEquipEvent>* a_eventSource) override;
-	};
-
-	inline static void Register() {
-
-		OnEquipEventHandler::RegisterListener();
-	}
-
-	inline static void RegisterQQ() {
-
-		OnEquipQuintessentialHandler::RegisterListener();
-	}
 }
