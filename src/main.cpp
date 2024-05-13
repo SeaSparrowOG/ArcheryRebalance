@@ -1,6 +1,4 @@
 #include "settings.h"
-#include "installHook.h"
-
 #include <stddef.h>
 
 namespace {

@@ -1,6 +1,7 @@
 #include "settings.h"
 #include "equipmentAdjuster.h"
 #include "eventHandler.h"
+#include "installHook.h"
 
 namespace {
 	bool ShouldRebuildINI(CSimpleIniA* a_ini) {
@@ -75,10 +76,10 @@ namespace {
 				ini.SetDoubleValue("General", "fAdditionalBoltDamage", 0.0f,
 					";The amount by which to increase bolt damage. Must be bigger or equal to 0.0. No effect if bBuffBoltDamage is set to false.");
 
-				ini.SetDoubleValue("General", "fNewArrowSpeed", 6000.0f,
+				ini.SetDoubleValue("General", "fNewArrowSpeed", 4000.0f,
 					";The new arrow speed. No effect if bIncreaseArrowSpeed is set to false.");
 
-				ini.SetDoubleValue("General", "fNewBoltSpeed", 8500.0f,
+				ini.SetDoubleValue("General", "fNewBoltSpeed", 7000.0f,
 					";The new bolt speed. No effect if bIncreaseBoltSpeed is set to false.");
 
 				ini.SetDoubleValue("General", "fConjurationWeight", 0.6f,
@@ -135,7 +136,9 @@ namespace Settings {
 			_loggerError("Failed to adjust weapons.");
 			return false;
 		}
+
 		EventHandler::OnEquip::GetSingleton()->RegisterListener();
+		Hooks::Install();
 		return true;
 	}
 }
