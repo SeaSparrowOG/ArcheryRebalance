@@ -84,7 +84,7 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
     SKSE::PluginVersionData v;
     v.PluginVersion({ Version::MAJOR, Version::MINOR, Version::PATCH });
     v.PluginName(Version::PROJECT);
-    v.AuthorName("SeaSparrow");
+    v.AuthorName(Version::PROJECT_AUTHOR);
     v.UsesAddressLibrary();
     v.UsesUpdatedStructs();
     v.CompatibleVersions({
