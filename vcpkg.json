@@ -1,22 +1,20 @@
 {
-    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
-    "name": "quintessential-quivers",
-    "version-string": "1.0.0",
-    "port-version": 0,
-    "description": "Simple SKSE plugin that aims to make arrow choice important.",
-    "homepage": "",
-    "license": "Apache-2.0",
-    "features": {
-        "plugin": {
-            "description": "Build the SKSE plugin.",
-            "dependencies": [
-              "articuno",
-              "simpleini",
-              "commonlibsse-ng"
-            ]
-        }
-    },
-    "default-features": [
-        "plugin"
-    ]
+  "name": "archeryrebalance",
+  "version-string": "2.0.0",
+  "description": "Rebalances Skyrim SE's archery and introduces new features.",
+  "homepage": "",
+  "license": "MIT",
+  "dependencies": [
+    "rsm-binary-io",
+    "spdlog",
+    "clib-util",
+    "xbyak"
+  ],
+  "overrides": [
+    {
+      "name": "fmt",
+      "version": "9.1.0"
+    }
+  ],
+  "builtin-baseline": "b7dba7f9aad09a56900f21cd78cfda1258e54e38"
 }
