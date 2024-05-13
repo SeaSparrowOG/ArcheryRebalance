@@ -119,6 +119,11 @@ namespace Settings {
 		boltAdjuster->UpdateBoltDamageSettings(bBuffBolts, fAdditionalBoltDamage);
 		arrowAdjuster->UpdateArrowDamageSettings(bBuffArrows, fAdditionalArrowDamage);
 		arrowAdjuster->UpdateArrowSpeedSettings(bAdjustArrowSpeed, fNewArrowSpeed);
+
+		if (!AdjustWeapons::AdjustWeapons()) {
+			_loggerError("Failed to adjust weapons.");
+			return false;
+		}
 		return true;
 	}
 }
