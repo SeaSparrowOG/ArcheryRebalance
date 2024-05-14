@@ -16,6 +16,7 @@ namespace {
 
 			"bAdjustBowDrawSpeed",
 			"bAccountConjuration",
+			"bEnforceArcherySettings",
 
 			"fAdditionalArrowDamage",
 			"fAdditionalBoltDamage",
@@ -76,7 +77,10 @@ namespace {
 					";Main functionality of the mod, allows for dynamic draw speed based on bow weight and archery skill.");
 
 				ini.SetBoolValue("General", "bAccountConjuration", false,
-					";If using a bound weapon, accounts for conjuration skill in addition to archery for dynamic draw speed. No effect if bAdjustBowDrawSpeed is set to false");
+					";If using a bound weapon, accounts for conjuration skill in addition to archery for dynamic draw speed. No effect if bAdjustBowDrawSpeed is set to false.");
+
+				ini.SetBoolValue("General", "bEnforceArcherySettings", false,
+					";Enforces recommended archery settings found in Skyrim.ini. Copied from Synthesis - Another Archery Patcher.");
 
 
 				ini.SetDoubleValue("General", "fAdditionalArrowDamage", 0.0f,
@@ -147,6 +151,23 @@ namespace Settings {
 		if (!AdjustWeapons::AdjustWeapons()) {
 			_loggerError("Failed to adjust weapons.");
 			return false;
+		}
+		
+		if (ini.GetBoolValue("General", "bEnforceArcherySettings")) {	
+			//INI settings to change, and their new value. INI settings are written as "settingName":"sectionName".
+			static constexpr auto settingPairs = std::to_array<std::pair<const char*, float>>({
+				{"f1PArrowTiltUpAngle:Combat", 0.2f},
+				{"f1PboltTiltUpAngle:Combat", 0.2f},
+				{"f3PArrowTiltUpAngle:Combat", 0.2f},
+				{"fMagnetismStrafeHeadingMult:Combat", 0.2f},
+				{"fMagnetismLookingMult:Combat", 0.2f}
+			});
+
+			for (auto& pair : settingPairs) {
+				auto* setting = RE::GetINISetting(pair.first);
+				if (!setting) continue;
+				setting->data.f = pair.second;
+			}
 		}
 
 		onEquipListener->RegisterListener();
