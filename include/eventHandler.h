@@ -1,32 +1,39 @@
 #pragma once
 
-namespace Events {
+namespace EventHandler {
+#define continueEvent RE::BSEventNotifyControl::kContinue
 
-	class OnEquipEventHandler : public RE::BSTEventSink<RE::TESEquipEvent> {
-
+	/*
+	Listens for actors equipping (bows and arrows) or (crossbows and bolts) and reacts appropriately.
+	*/
+	class OnEquip :
+		public RE::BSTEventSink<RE::TESEquipEvent>,
+		public clib_util::singleton::ISingleton<OnEquip> {
 	public:
+		//Registers the listener, so it can actually respond to game events.
+		bool RegisterListener();
+		void UpdateDrawSpeedSetting(bool a_enableDynamicDraw, bool a_enableConjurationFactor, double a_conjurationWeight);
 
-		static OnEquipEventHandler* GetSingleton();
-		static void                 RegisterListener();
-		RE::BSEventNotifyControl    ProcessEvent(const RE::TESEquipEvent* a_event, RE::BSTEventSource<RE::TESEquipEvent>* a_eventSource) override;
+	private:
+		RE::BSEventNotifyControl ProcessEvent(const RE::TESEquipEvent* a_event, RE::BSTEventSource<RE::TESEquipEvent>* a_eventSource) override;
+
+		bool   bAdjustBowDrawSpeed;
+		bool   bAccountConjuration;
+		double fConjurationWeight;
 	};
 
-	class OnEquipQuintessentialHandler : public RE::BSTEventSink<RE::TESEquipEvent> {
-
+	class OnLoad :
+		public RE::BSTEventSink<RE::TESObjectLoadedEvent>,
+		public clib_util::singleton::ISingleton<OnLoad> {
 	public:
+		bool RegisterListener();
+		void UpdateDrawSpeedSetting(bool a_enableDynamicDraw, bool a_enableConjurationFactor, double a_conjurationWeight);
 
-		static OnEquipQuintessentialHandler* GetSingleton();
-		static void                          RegisterListener();
-		RE::BSEventNotifyControl             ProcessEvent(const RE::TESEquipEvent* a_event, RE::BSTEventSource<RE::TESEquipEvent>* a_eventSource) override;
+	private:
+		RE::BSEventNotifyControl ProcessEvent(const RE::TESObjectLoadedEvent* a_event, RE::BSTEventSource<RE::TESObjectLoadedEvent>* a_eventSource) override;
+
+		bool   bAdjustBowDrawSpeed;
+		bool   bAccountConjuration;
+		double fConjurationWeight;
 	};
-
-	inline static void Register() {
-
-		OnEquipEventHandler::RegisterListener();
-	}
-
-	inline static void RegisterQQ() {
-
-		OnEquipQuintessentialHandler::RegisterListener();
-	}
 }

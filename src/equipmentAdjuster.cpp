@@ -1,177 +1,251 @@
 #include "equipmentAdjuster.h"
 
-namespace Adjuster {
-
-	bool AdjustArrows(bool a_adjustSpeed, float a_newArrowSpeed) {
-
-		SKSE::log::info("=============================================================");
-		SKSE::log::info("=================Beginning Arrow Adjustment==================");
-		SKSE::log::info("=============================================================");
-		int totalArrows = 0;
-
-		if (const auto dataHandler = RE::TESDataHandler::GetSingleton(); dataHandler) {
-
-			for (const auto& foundArrow : dataHandler->GetFormArray<RE::TESAmmo>()) {
-				if ((foundArrow->data.flags & RE::AMMO_DATA::Flag::kNonBolt) && !(foundArrow->data.flags & RE::AMMO_DATA::Flag::kNonPlayable)) {
-
-					if (!(foundArrow->data.damage <= 0)) {
-
-						//Formula Here.
-						float originalDamage = foundArrow->data.damage;
-						foundArrow->data.damage = floor(std::pow(originalDamage, 2.3) * 0.01 + std::pow(originalDamage, 1.3) * 0.1 + 5.3);
-						SKSE::log::info("{} Damage {} -> {}", foundArrow->GetName(), originalDamage, foundArrow->data.damage);
-						totalArrows++;
-
-						//Adjust speed
-						if (a_adjustSpeed) {
-
-							float fOriginalSpeed = foundArrow->data.projectile->data.speed;
-
-							foundArrow->data.projectile->data.speed = a_newArrowSpeed;
-							SKSE::log::info("{} Speed {} -> {}", foundArrow->GetName(), fOriginalSpeed, foundArrow->data.projectile->data.speed);
-						}
-					}
-				}
-			}
-		} 
+namespace AdjustWeapons {
+	bool AdjustWeapons() {
+		if (ArrowAdjuster::GetSingleton()->Adjust()) {
+			_loggerInfo("Finished adjusting arrows.");
+		}
 		else {
-
+			_loggerError("Encountered error while adjusting arrows.");
 			return false;
 		}
 
-		SKSE::log::info(" ");
-		SKSE::log::info("Number of arrows adjusted: {}", totalArrows);
-		SKSE::log::info(" ");
+		if (BoltAdjuster::GetSingleton()->Adjust()) {
+			_loggerInfo("Finished adjusting bolts.");
+		}
+		else {
+			_loggerError("Encountered error while adjusting bolts.");
+			return false;
+		}
+
+		if (BowAdjuster::GetSingleton()->Adjust()) {
+			_loggerInfo("Finished adjusting bows.");
+		}
+		else {
+			_loggerError("Encountered error while adjusting bows.");
+			return false;
+		}
+
 		return true;
 	}
 
-	bool AdjustBolts(bool a_PierceArmor, bool a_adjustSpeed, float a_newBoltSpeed) {
+	void ArrowAdjuster::UpdateArrowDamageSettings(bool a_adjustArrowDamage, double a_additionalDamage) {
+		this->bBuffArrowDamage = a_adjustArrowDamage;
 
-		SKSE::log::info("=============================================================");
-		SKSE::log::info("==================Beginning Bolt Adjustment==================");
-		SKSE::log::info("=============================================================");
-		int totalBolts = 0;
-
-		if (const auto dataHandler = RE::TESDataHandler::GetSingleton(); dataHandler) {
-
-			for (const auto& foundBolt : dataHandler->GetFormArray<RE::TESAmmo>()) {
-
-				if (!(foundBolt->data.flags & RE::AMMO_DATA::Flag::kNonBolt) && !(foundBolt->data.flags & RE::AMMO_DATA::Flag::kNonPlayable)) {
-
-					if (!(foundBolt->data.flags == RE::AMMO_DATA::Flag::kNonPlayable)) {
-
-						if (!(foundBolt->data.damage <= 0)) {
-							
-							float originalDamage = foundBolt->data.damage;
-
-							if (a_PierceArmor) {
-
-								foundBolt->data.flags.set(RE::AMMO_DATA::Flag::kIgnoresNormalWeaponResistance);
-							}
-
-							foundBolt->data.damage = floor(std::pow(originalDamage, 2.3) * 0.01 + std::pow(originalDamage, 1.3) * 0.1 + 5.3);
-							SKSE::log::info("{} Damage: {} -> {}, Ignores Armor: {}", foundBolt->GetName(), originalDamage, foundBolt->data.damage, foundBolt->IgnoresNormalWeaponResistance());
-							totalBolts++;
-
-							//Adjust speed
-							if (a_adjustSpeed) {
-
-								float fOriginalSpeed = foundBolt->data.projectile->data.speed;
-
-								foundBolt->data.projectile->data.speed = a_newBoltSpeed;
-								SKSE::log::info("{} Speed {} -> {}", foundBolt->GetName(), fOriginalSpeed, foundBolt->data.projectile->data.speed);
-							}
-						}
-					}
-				}
+		if (a_additionalDamage >= 0.0f) {
+			if (a_additionalDamage > 100.0f) {
+				this->fAdditionalArrowDamage = 100.f;
+			}
+			else {
+				this->fAdditionalArrowDamage = a_additionalDamage;
 			}
 		}
 		else {
+			this->fAdditionalArrowDamage = 0.0f;
+		}
+	}
 
+	void BoltAdjuster::UpdateBoltDamageSettings(bool a_boltsPenetrateArmor, bool a_adjustBoltDamage, double a_additionalDamage) {
+		this->bBuffBoltDamage = a_adjustBoltDamage;
+		this->bBoltsPenetrateArmor = a_boltsPenetrateArmor;
+
+		if (a_additionalDamage >= 0.0f) {
+			if (a_additionalDamage > 100.0f) {
+				this->fAdditionalBoltDamage = 100.f;
+			}
+			else {
+				this->fAdditionalBoltDamage = a_additionalDamage;
+			}
+		}
+		else {
+			this->fAdditionalBoltDamage = 0.0f;
+		}
+	}
+
+	void ArrowAdjuster::UpdateArrowSpeedSettings(bool a_adjustArrowSpeed, double a_newArrowSpeed) {
+		this->bIncreaseArrowSpeed = a_adjustArrowSpeed;
+
+		if (a_newArrowSpeed > 1000.0f) {
+			if (a_newArrowSpeed > 15000.0f) {
+				this->fNewArrowSpeed = 15000.0f;
+			}
+			else {
+				this->fNewArrowSpeed = a_newArrowSpeed;
+			}
+		}
+		else {
+			this->bIncreaseArrowSpeed = false;
+			this->fNewArrowSpeed = 0.0f;
+		}
+	}
+
+	void BoltAdjuster::UpdateBoltSpeedSettings(bool a_adjustBoltSpeed, double a_newBoltSpeed) {
+		this->bIncreaseBoltSpeed = a_adjustBoltSpeed;
+
+		if (a_newBoltSpeed > 1000.0f) {
+			if (a_newBoltSpeed > 15000.0f) {
+				this->fNewBoltSpeed = 15000.0f;
+			}
+			else {
+				this->fNewBoltSpeed = a_newBoltSpeed;
+			}
+		}
+		else {
+			this->bIncreaseBoltSpeed = false;
+			this->fNewBoltSpeed = 0.0f;
+		}
+	}
+
+	bool ArrowAdjuster::Adjust() {
+		if (!bBuffArrowDamage && !bIncreaseArrowSpeed) return true;
+
+		const auto& dataHandler = RE::TESDataHandler::GetSingleton();
+		std::vector<std::pair<std::string, std::pair<bool, bool>>> adjustedArrows;
+
+		if (!dataHandler) {
+			_loggerError("Failed to get the data handler.");
 			return false;
 		}
 
-		SKSE::log::info(" ");
-		SKSE::log::info("Number of bolts adjusted: {}", totalBolts);
-		SKSE::log::info(" ");
+		const auto& ammoArray = dataHandler->GetFormArray<RE::TESAmmo>();
+		for (auto* ammo : ammoArray) {
+			auto ammoData = ammo->data;
+			if (ammoData.flags & RE::AMMO_DATA::Flag::kNonBolt) continue;
+			if (ammoData.flags & RE::AMMO_DATA::Flag::kNonPlayable) continue;
+			if (ammoData.damage < 1.0f) continue;
+			std::string ammoName = ammo->GetName();
+			bool bAdjustedSpeed = false;
+			bool bAdjustedDamage = false;
+
+			if (this->bIncreaseArrowSpeed) {
+				auto* ammoProjectile = ammoData.projectile;
+				if (ammoProjectile) {
+					ammoProjectile->data.speed = this->fNewArrowSpeed;
+					bAdjustedSpeed = true;
+				}
+			}
+
+			if (this->bBuffArrowDamage) {
+				ammoData.damage += this->fAdditionalArrowDamage;
+				bAdjustedDamage = true;
+			}
+
+			if (!ammoName.empty() && (bAdjustedDamage || bAdjustedSpeed)) {
+				std::pair<std::string, std::pair<bool, bool>> newPair;
+				newPair.first = ammoName;
+				newPair.second.first = bAdjustedSpeed;
+				newPair.second.second = bAdjustedDamage;
+				adjustedArrows.push_back(newPair);
+			}
+		}
+
+		if (!adjustedArrows.empty()) {
+			_loggerInfo("");
+			_loggerInfo("================================================================");
+			_loggerInfo("Arrow Adjustment Report:");
+			_loggerInfo("New speed: {}.", this->fNewArrowSpeed);
+			_loggerInfo("Additional damage: {}.", this->fAdditionalArrowDamage);
+			for (auto& arrowInfo : adjustedArrows) {
+				_loggerInfo("    >{}:", arrowInfo.first);
+				_loggerInfo("        Adjusted Speed: {}, Adjusted Damage: {}.", arrowInfo.second.first, arrowInfo.second.second);
+			}
+			_loggerInfo("================================================================");
+		}
 		return true;
 	}
 
-	bool AdjustBows(bool a_Equalize) {
+	bool BoltAdjuster::Adjust() {
+		if (!bBuffBoltDamage && !bIncreaseBoltSpeed && !bBoltsPenetrateArmor) return true;
 
-		SKSE::log::info("=============================================================");
-		SKSE::log::info("==================Beginning Bow Adjustment===================");
-		SKSE::log::info("=============================================================");
-		int totalBows = 0;
+		const auto& dataHandler = RE::TESDataHandler::GetSingleton();
+		std::vector<std::pair<std::string, std::pair<bool, bool>>> adjustedBolts;
 
-		if (const auto dataHandler = RE::TESDataHandler::GetSingleton(); dataHandler) {
-
-			for (const auto& foundBow : dataHandler->GetFormArray<RE::TESObjectWEAP>()) {
-
-				if (foundBow->IsBow()) {
-
-					if (foundBow->GetPlayable()) {
-
-						if (!(foundBow->GetAttackDamage() <= 0)) {
-
-							foundBow->attackDamage = foundBow->attackDamage - 3;
-
-							if (a_Equalize) {
-
-								foundBow->weaponData.speed = 1.0;
-							}
-
-							SKSE::log::info("{} Damage: {}, Speed: {}", foundBow->GetName(), foundBow->GetAttackDamage(), foundBow->GetSpeed());
-							totalBows++;
-						}
-					}
-				}
-			}
-		}
-		else {
-
+		if (!dataHandler) {
+			_loggerError("Failed to get the data handler.");
 			return false;
 		}
 
-		SKSE::log::info(" ");
-		SKSE::log::info("Number of bows adjusted: {}", totalBows);
-		SKSE::log::info(" ");
+		const auto& ammoArray = dataHandler->GetFormArray<RE::TESAmmo>();
+		for (auto* ammo : ammoArray) {
+			auto ammoData = ammo->data;
+			if (!(ammoData.flags & RE::AMMO_DATA::Flag::kNonBolt)) continue;
+			if (ammoData.flags & RE::AMMO_DATA::Flag::kNonPlayable) continue;
+			if (ammoData.damage < 1.0f) continue;
+			std::string ammoName = ammo->GetName();
+			bool bAdjustedSpeed = false;
+			bool bAdjustedDamage = false;
+
+			if (this->bIncreaseBoltSpeed) {
+				auto* ammoProjectile = ammoData.projectile;
+				if (ammoProjectile) {
+					ammoProjectile->data.speed = this->fNewBoltSpeed;
+					bAdjustedSpeed = true;
+				}
+			}
+
+			if (this->bBuffBoltDamage) {
+				ammoData.damage += this->fAdditionalBoltDamage;
+				bAdjustedDamage = true;
+			}
+
+			if (this->bBoltsPenetrateArmor) {
+				ammo->data.flags.set(RE::AMMO_DATA::Flag::kIgnoresNormalWeaponResistance);
+			}
+
+			if (!ammoName.empty() && (bAdjustedDamage || bAdjustedSpeed)) {
+				std::pair<std::string, std::pair<bool, bool>> newPair;
+				newPair.first = ammoName;
+				newPair.second.first = bAdjustedSpeed;
+				newPair.second.second = bAdjustedDamage;
+				adjustedBolts.push_back(newPair);
+			}
+		}
+
+		_loggerInfo("");
+		_loggerInfo("================================================================");
+		_loggerInfo("Bolt Adjustment Report:");
+		_loggerInfo("New speed: {}.", this->fNewBoltSpeed);
+		_loggerInfo("Additional damage: {}.", this->fAdditionalBoltDamage);
+		_loggerInfo("Penetrate armor: {}.", this->bBoltsPenetrateArmor);
+
+		for (auto& boltInfo : adjustedBolts) {
+			_loggerInfo("    >{}:", boltInfo.first);
+			_loggerInfo("        Adjusted Speed: {}, Adjusted Damage: {}.", boltInfo.second.first, boltInfo.second.second);
+		}
+
+		_loggerInfo("================================================================");
 		return true;
 	}
 
-	bool AdjustCrossbows() {
+	bool BowAdjuster::Adjust() {
+		const auto& dataHandler = RE::TESDataHandler::GetSingleton();
+		std::vector<std::string> adjustedBows;
 
-		SKSE::log::info("=============================================================");
-		SKSE::log::info("================Beginning Crossbow Adjustment================");
-		SKSE::log::info("=============================================================");
-		int totalCrossbows = 0;
-
-		if (const auto dataHandler = RE::TESDataHandler::GetSingleton(); dataHandler) {
-
-			for (const auto& foundCrossbow : dataHandler->GetFormArray<RE::TESObjectWEAP>()) {
-
-				if (foundCrossbow->IsCrossbow()) {
-
-					if (foundCrossbow->GetPlayable()) {
-
-						if (!(foundCrossbow->GetAttackDamage() <= 0)) {
-
-							foundCrossbow->attackDamage = foundCrossbow->attackDamage - 1;
-							SKSE::log::info("{} Damage: {}.", foundCrossbow->GetName(), foundCrossbow->GetAttackDamage());
-							totalCrossbows++;
-						}
-					}
-				}
-			}
-		}
-		else {
-
+		if (!dataHandler) {
+			_loggerError("Failed to get the data handler.");
 			return false;
 		}
 
-		SKSE::log::info(" ");
-		SKSE::log::info("Number of crossbows adjusted: {}", totalCrossbows);
-		SKSE::log::info(" ");
+		const auto& weaponArray = dataHandler->GetFormArray<RE::TESObjectWEAP>();
+		for (auto* weapon : weaponArray) {
+			if (!weapon->GetPlayable()) continue;
+			if (!weapon->IsBow()) continue;
+			std::string bowName = weapon->GetName();
+			
+			weapon->weaponData.speed = 1.0f;
+			if (!bowName.empty()) {
+				adjustedBows.push_back(bowName);
+			}
+		}
+
+		std::sort(adjustedBows.begin(), adjustedBows.end());
+		_loggerInfo("");
+		_loggerInfo("================================================================");
+		_loggerInfo("Bow Adjustment Report:");
+		for (auto& bow : adjustedBows) {
+			_loggerInfo("    >{}", bow);
+		}
+		_loggerInfo("================================================================");
 		return true;
 	}
 }

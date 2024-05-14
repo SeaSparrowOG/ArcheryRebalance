@@ -1,6 +1,7 @@
 #pragma once
 
-namespace Hook {
+namespace Hooks {
 
+	//Installs the hook associated with the plugin. Adjust projectile speed.
 	void Install();
 }
