@@ -1,10 +1,15 @@
-A simple plugin with a single goal: To make archery more balanced. 
-As such, it is being nerfed, but in an interesting way. Now, bow draw speed
-relies exclusively on a function of the wielder's archery skill and the 
-bow's weight.
+## Archery Rebalance
+SKSE plugin for Skyrim SE that makes slight, but noticeable changes to archery for a more interesting experience. 
 
-How to build:
-1. Clone the repository.
-2. Open the folder with VS.
-3. Choose Release-MSVC.
-4. Build.
+## Building
+1. Install VCPKG and add its installation location in an environment variable called "VCPKG_ROOT".
+2. Install CMake.
+3. Install VS with C++ Desktop Development
+4. Clone this repository.
+5. Open a Git Bash/Powershell Window in the project folder, and run git submodule innit and git submodule update --recursive
+6. Open the project in VS, wait for CMake to finish, and build the project.
+
+## Automagically deploy
+If you want to deploy directly in a MO2 instance, you can add the mods folder of that instance in an
+environment variable called "SKYRIM_MODS_FOLDER". Upon building, it will automatically create a mod
+folder in that location with the built DLL inside.
