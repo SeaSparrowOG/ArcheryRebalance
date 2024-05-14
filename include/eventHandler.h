@@ -21,4 +21,19 @@ namespace EventHandler {
 		bool   bAccountConjuration;
 		double fConjurationWeight;
 	};
+
+	class OnLoad :
+		public RE::BSTEventSink<RE::TESObjectLoadedEvent>,
+		public clib_util::singleton::ISingleton<OnLoad> {
+	public:
+		bool RegisterListener();
+		void UpdateDrawSpeedSetting(bool a_enableDynamicDraw, bool a_enableConjurationFactor, double a_conjurationWeight);
+
+	private:
+		RE::BSEventNotifyControl ProcessEvent(const RE::TESObjectLoadedEvent* a_event, RE::BSTEventSource<RE::TESObjectLoadedEvent>* a_eventSource) override;
+
+		bool   bAdjustBowDrawSpeed;
+		bool   bAccountConjuration;
+		double fConjurationWeight;
+	};
 }

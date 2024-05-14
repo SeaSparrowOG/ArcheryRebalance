@@ -101,8 +101,9 @@ namespace Settings {
 		auto* arrowAdjuster = AdjustWeapons::ArrowAdjuster::GetSingleton();
 		auto* boltAdjuster = AdjustWeapons::BoltAdjuster::GetSingleton();
 		auto* onEquipListener = EventHandler::OnEquip::GetSingleton();
+		auto* OnLoadListener = EventHandler::OnLoad::GetSingleton();
 
-		if (!(arrowAdjuster && boltAdjuster && onEquipListener)) {
+		if (!(arrowAdjuster && boltAdjuster && onEquipListener && OnLoadListener)) {
 			_loggerError("Failed to fetch adjuster singletons. I have no idea if this is possible.");
 			return false;
 		}
@@ -127,6 +128,7 @@ namespace Settings {
 		double fConjurationSkillWeight = ini.GetDoubleValue("General", "fConjurationWeight");
 
 		onEquipListener->UpdateDrawSpeedSetting(bEnableMainFunctionality, bAccountForConjurationSkill, fConjurationSkillWeight);
+		OnLoadListener->UpdateDrawSpeedSetting(bEnableMainFunctionality, bAccountForConjurationSkill, fConjurationSkillWeight);
 		boltAdjuster->UpdateBoltSpeedSettings(bAdjustBoltSpeed, fNewBoltSpeed);
 		boltAdjuster->UpdateBoltDamageSettings(bBuffBolts, fAdditionalBoltDamage);
 		arrowAdjuster->UpdateArrowDamageSettings(bBuffArrows, fAdditionalArrowDamage);
@@ -137,7 +139,8 @@ namespace Settings {
 			return false;
 		}
 
-		EventHandler::OnEquip::GetSingleton()->RegisterListener();
+		onEquipListener->RegisterListener();
+		OnLoadListener->RegisterListener();
 		Hooks::Install();
 		return true;
 	}
