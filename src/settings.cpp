@@ -163,10 +163,10 @@ namespace Settings {
 				{"fMagnetismLookingMult:Combat", 0.2f}
 			});
 
-			for (auto& pair : settingPairs) {
-				auto* setting = RE::GetINISetting(pair.first);
-				if (!setting) continue;
-				setting->data.f = pair.second;
+			for (auto& [name, value] : settingPairs) {
+				if (auto* setting = RE::GetINISetting(name)) {
+					setting->data.f = value;
+				}
 			}
 		}
 
