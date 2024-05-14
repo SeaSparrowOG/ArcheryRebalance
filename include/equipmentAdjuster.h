@@ -28,12 +28,13 @@ namespace AdjustWeapons {
 	class BoltAdjuster : public clib_util::singleton::ISingleton<BoltAdjuster> {
 	public:
 		bool Adjust();
-		void UpdateBoltDamageSettings(bool a_adjustBoltDamage, double a_additionalDamage);
+		void UpdateBoltDamageSettings(bool a_boltsPenetrateArmor, bool a_adjustBoltDamage, double a_additionalDamage);
 		void UpdateBoltSpeedSettings(bool a_adjustBoltSpeed, double a_newBoltSpeed);
 
 	private:
 		bool   bBuffBoltDamage;
 		bool   bIncreaseBoltSpeed;
+		bool   bBoltsPenetrateArmor;
 		double fAdditionalBoltDamage;
 		double fNewBoltSpeed;
 	};

@@ -10,6 +10,10 @@ namespace {
 			"bBuffBoltDamage",
 			"bIncreaseArrowSpeed",
 			"bIncreaseBoltSpeed",
+
+			//Note: "Ignores Weapon Resistance" (the flag) seems to be ignored?
+			//"bBoltsPenetrateArmor",
+
 			"bAdjustBowDrawSpeed",
 			"bAccountConjuration",
 
@@ -56,6 +60,11 @@ namespace {
 
 				ini.SetBoolValue("General", "bBuffBoltDamage", false,
 					";Increases bolt damage by a specific amount.");
+
+				/* See note in ShouldRebuildINI.
+				ini.SetBoolValue("General", "bBoltsPenetrateArmor", false,
+					";Makes it so bolts penetrate armor by default.");
+				*/
 
 				ini.SetBoolValue("General", "bIncreaseArrowSpeed", true,
 					";Increases arrow speed TO a specific amount.");
@@ -119,6 +128,7 @@ namespace Settings {
 		double fNewArrowSpeed = ini.GetDoubleValue("General", "fNewArrowSpeed");
 
 		bool bBuffBolts = ini.GetBoolValue("General", "bBuffBoltDamage");
+		bool bBoltsPenetrateArmor = ini.GetBoolValue("General", "bBoltsPenetrateArmor");
 		double fAdditionalBoltDamage = ini.GetDoubleValue("General", "fAdditionalBoltDamage");
 		bool bAdjustBoltSpeed = ini.GetBoolValue("General", "bIncreaseBoltSpeed");
 		double fNewBoltSpeed = ini.GetDoubleValue("General", "fNewBoltSpeed");
@@ -130,7 +140,7 @@ namespace Settings {
 		onEquipListener->UpdateDrawSpeedSetting(bEnableMainFunctionality, bAccountForConjurationSkill, fConjurationSkillWeight);
 		OnLoadListener->UpdateDrawSpeedSetting(bEnableMainFunctionality, bAccountForConjurationSkill, fConjurationSkillWeight);
 		boltAdjuster->UpdateBoltSpeedSettings(bAdjustBoltSpeed, fNewBoltSpeed);
-		boltAdjuster->UpdateBoltDamageSettings(bBuffBolts, fAdditionalBoltDamage);
+		boltAdjuster->UpdateBoltDamageSettings(bBoltsPenetrateArmor, bBuffBolts, fAdditionalBoltDamage);
 		arrowAdjuster->UpdateArrowDamageSettings(bBuffArrows, fAdditionalArrowDamage);
 		arrowAdjuster->UpdateArrowSpeedSettings(bAdjustArrowSpeed, fNewArrowSpeed);
 

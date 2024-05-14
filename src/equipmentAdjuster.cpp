@@ -45,8 +45,9 @@ namespace AdjustWeapons {
 		}
 	}
 
-	void BoltAdjuster::UpdateBoltDamageSettings(bool a_adjustBoltDamage, double a_additionalDamage) {
+	void BoltAdjuster::UpdateBoltDamageSettings(bool a_boltsPenetrateArmor, bool a_adjustBoltDamage, double a_additionalDamage) {
 		this->bBuffBoltDamage = a_adjustBoltDamage;
+		this->bBoltsPenetrateArmor = a_boltsPenetrateArmor;
 
 		if (a_additionalDamage >= 0.0f) {
 			if (a_additionalDamage > 100.0f) {
@@ -154,7 +155,7 @@ namespace AdjustWeapons {
 	}
 
 	bool BoltAdjuster::Adjust() {
-		if (!bBuffBoltDamage && !bIncreaseBoltSpeed) return true;
+		if (!bBuffBoltDamage && !bIncreaseBoltSpeed && !bBoltsPenetrateArmor) return true;
 
 		const auto& dataHandler = RE::TESDataHandler::GetSingleton();
 		std::vector<std::pair<std::string, std::pair<bool, bool>>> adjustedBolts;
@@ -187,6 +188,10 @@ namespace AdjustWeapons {
 				bAdjustedDamage = true;
 			}
 
+			if (this->bBoltsPenetrateArmor) {
+				ammo->data.flags.set(RE::AMMO_DATA::Flag::kIgnoresNormalWeaponResistance);
+			}
+
 			if (!ammoName.empty() && (bAdjustedDamage || bAdjustedSpeed)) {
 				std::pair<std::string, std::pair<bool, bool>> newPair;
 				newPair.first = ammoName;
@@ -201,10 +206,13 @@ namespace AdjustWeapons {
 		_loggerInfo("Bolt Adjustment Report:");
 		_loggerInfo("New speed: {}.", this->fNewBoltSpeed);
 		_loggerInfo("Additional damage: {}.", this->fAdditionalBoltDamage);
+		_loggerInfo("Penetrate armor: {}.", this->bBoltsPenetrateArmor);
+
 		for (auto& boltInfo : adjustedBolts) {
 			_loggerInfo("    >{}:", boltInfo.first);
 			_loggerInfo("        Adjusted Speed: {}, Adjusted Damage: {}.", boltInfo.second.first, boltInfo.second.second);
 		}
+
 		_loggerInfo("================================================================");
 		return true;
 	}
