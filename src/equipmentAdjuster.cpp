@@ -34,7 +34,7 @@ namespace AdjustWeapons {
 
 		if (a_additionalDamage >= 0.0f) {
 			if (a_additionalDamage > 100.0f) {
-				this->fAdditionalArrowDamage = 100.f;
+				this->fAdditionalArrowDamage = 100.0f;
 			}
 			else {
 				this->fAdditionalArrowDamage = a_additionalDamage;
@@ -109,9 +109,9 @@ namespace AdjustWeapons {
 
 		const auto& ammoArray = dataHandler->GetFormArray<RE::TESAmmo>();
 		for (auto* ammo : ammoArray) {
-			auto ammoData = ammo->data;
-			if (ammoData.flags & RE::AMMO_DATA::Flag::kNonBolt) continue;
-			if (ammoData.flags & RE::AMMO_DATA::Flag::kNonPlayable) continue;
+			auto& ammoData = ammo->data;
+			if (ammo->IsBolt()) continue;
+			if (!ammo->GetPlayable()) continue;
 			if (ammoData.damage < 1.0f) continue;
 			std::string ammoName = ammo->GetName();
 			bool bAdjustedSpeed = false;
@@ -167,9 +167,9 @@ namespace AdjustWeapons {
 
 		const auto& ammoArray = dataHandler->GetFormArray<RE::TESAmmo>();
 		for (auto* ammo : ammoArray) {
-			auto ammoData = ammo->data;
-			if (!(ammoData.flags & RE::AMMO_DATA::Flag::kNonBolt)) continue;
-			if (ammoData.flags & RE::AMMO_DATA::Flag::kNonPlayable) continue;
+			auto& ammoData = ammo->data;
+			if (!ammo->IsBolt()) continue;
+			if (!ammo->GetPlayable()) continue;
 			if (ammoData.damage < 1.0f) continue;
 			std::string ammoName = ammo->GetName();
 			bool bAdjustedSpeed = false;
@@ -188,10 +188,6 @@ namespace AdjustWeapons {
 				bAdjustedDamage = true;
 			}
 
-			if (this->bBoltsPenetrateArmor) {
-				ammo->data.flags.set(RE::AMMO_DATA::Flag::kIgnoresNormalWeaponResistance);
-			}
-
 			if (!ammoName.empty() && (bAdjustedDamage || bAdjustedSpeed)) {
 				std::pair<std::string, std::pair<bool, bool>> newPair;
 				newPair.first = ammoName;
@@ -206,13 +202,11 @@ namespace AdjustWeapons {
 		_loggerInfo("Bolt Adjustment Report:");
 		_loggerInfo("New speed: {}.", this->fNewBoltSpeed);
 		_loggerInfo("Additional damage: {}.", this->fAdditionalBoltDamage);
-		_loggerInfo("Penetrate armor: {}.", this->bBoltsPenetrateArmor);
 
 		for (auto& boltInfo : adjustedBolts) {
 			_loggerInfo("    >{}:", boltInfo.first);
 			_loggerInfo("        Adjusted Speed: {}, Adjusted Damage: {}.", boltInfo.second.first, boltInfo.second.second);
 		}
-
 		_loggerInfo("================================================================");
 		return true;
 	}
