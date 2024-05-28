@@ -18,6 +18,9 @@ namespace {
 			"bAccountConjuration",
 			"bEnforceArcherySettings",
 
+			//New - Makes the player the sole beneficiary of the dynamic draw system.
+			"bPlayerOnly",
+
 			"fAdditionalArrowDamage",
 			"fAdditionalBoltDamage",
 			"fNewArrowSpeed",
@@ -75,6 +78,9 @@ namespace {
 
 				ini.SetBoolValue("General", "bAdjustBowDrawSpeed", true,
 					";Main functionality of the mod, allows for dynamic draw speed based on bow weight and archery skill.");
+
+				ini.SetBoolValue("General", "bPlayerOnly", true,
+					";Makes the main mod only affect the player.");
 
 				ini.SetBoolValue("General", "bAccountConjuration", false,
 					";If using a bound weapon, accounts for conjuration skill in addition to archery for dynamic draw speed. No effect if bAdjustBowDrawSpeed is set to false.");
@@ -138,11 +144,12 @@ namespace Settings {
 		double fNewBoltSpeed = ini.GetDoubleValue("General", "fNewBoltSpeed");
 
 		bool bEnableMainFunctionality = ini.GetBoolValue("General", "bAdjustBowDrawSpeed");
+		bool bMainForPlayerOnly = ini.GetBoolValue("General", "bPlayerOnly");
 		bool bAccountForConjurationSkill = ini.GetBoolValue("General", "bAccountConjuration");
 		double fConjurationSkillWeight = ini.GetDoubleValue("General", "fConjurationWeight");
 
-		onEquipListener->UpdateDrawSpeedSetting(bEnableMainFunctionality, bAccountForConjurationSkill, fConjurationSkillWeight);
-		OnLoadListener->UpdateDrawSpeedSetting(bEnableMainFunctionality, bAccountForConjurationSkill, fConjurationSkillWeight);
+		onEquipListener->UpdateDrawSpeedSetting(bEnableMainFunctionality, bMainForPlayerOnly, bAccountForConjurationSkill, fConjurationSkillWeight);
+		OnLoadListener->UpdateDrawSpeedSetting(bEnableMainFunctionality, bMainForPlayerOnly, bAccountForConjurationSkill, fConjurationSkillWeight);
 		boltAdjuster->UpdateBoltSpeedSettings(bAdjustBoltSpeed, fNewBoltSpeed);
 		boltAdjuster->UpdateBoltDamageSettings(bBoltsPenetrateArmor, bBuffBolts, fAdditionalBoltDamage);
 		arrowAdjuster->UpdateArrowDamageSettings(bBuffArrows, fAdditionalArrowDamage);

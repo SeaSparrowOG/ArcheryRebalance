@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 set(PROJECT_AUTHOR "SeaSparrow" CACHE STRING "")
 set(NAME "ArcheryRebalance" CACHE STRING "")
-set(VERSION 2.0.1 CACHE STRING "")
+set(VERSION 2.1.0 CACHE STRING "")
 
 # ---- Options ----
 option(SUPPORT_VR "Build for VR." OFF)
