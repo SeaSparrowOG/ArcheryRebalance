@@ -146,8 +146,7 @@ namespace AdjustWeapons {
 			_loggerInfo("New speed: {}.", this->fNewArrowSpeed);
 			_loggerInfo("Additional damage: {}.", this->fAdditionalArrowDamage);
 			for (auto& arrowInfo : adjustedArrows) {
-				_loggerInfo("    >{}:", arrowInfo.first);
-				_loggerInfo("        Adjusted Speed: {}, Adjusted Damage: {}.", arrowInfo.second.first, arrowInfo.second.second);
+				_loggerInfo("    >{}", arrowInfo.first);
 			}
 			_loggerInfo("================================================================");
 		}
@@ -204,8 +203,7 @@ namespace AdjustWeapons {
 		_loggerInfo("Additional damage: {}.", this->fAdditionalBoltDamage);
 
 		for (auto& boltInfo : adjustedBolts) {
-			_loggerInfo("    >{}:", boltInfo.first);
-			_loggerInfo("        Adjusted Speed: {}, Adjusted Damage: {}.", boltInfo.second.first, boltInfo.second.second);
+			_loggerInfo("    >{}", boltInfo.first);
 		}
 		_loggerInfo("================================================================");
 		return true;
