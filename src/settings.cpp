@@ -11,9 +11,7 @@ namespace {
 			"bIncreaseArrowSpeed",
 			"bIncreaseBoltSpeed",
 
-			//Note: "Ignores Weapon Resistance" (the flag) seems to be ignored?
-			//"bBoltsPenetrateArmor",
-
+			"bBoltsPenetrateArmor",
 			"bAdjustBowDrawSpeed",
 			"bAccountConjuration",
 			"bEnforceArcherySettings",
@@ -75,6 +73,9 @@ namespace {
 
 				ini.SetBoolValue("General", "bIncreaseBoltSpeed", true,
 					";Increases bolt speed TO a specific amount.");
+
+				ini.SetBoolValue("General", "bBoltsPenetrateArmor", true,
+					";Allowsbolts to natively penetrate armor, regardless of weapon effects.");
 
 				ini.SetBoolValue("General", "bAdjustBowDrawSpeed", true,
 					";Main functionality of the mod, allows for dynamic draw speed based on bow weight and archery skill.");
@@ -180,6 +181,7 @@ namespace Settings {
 		onEquipListener->RegisterListener();
 		OnLoadListener->RegisterListener();
 		Hooks::Install();
+		if (bBoltsPenetrateArmor) Hooks::InstallDamageResistPatch();
 		return true;
 	}
 }

@@ -53,9 +53,31 @@ namespace Hooks {
 		static inline REL::Relocation<decltype(thunk)> func;
 	};
 
+	struct CombatHit
+	{
+		static bool   Install() {
+			return true;
+		}
+
+		static void   thunk(RE::Actor* target, RE::HitData* hitData) {
+			if (auto* hitWeapon = hitData->weapon) {
+				if (hitWeapon->IsCrossbow()) {
+					hitData->totalDamage = hitData->physicalDamage * hitData->bonusHealthDamageMult;
+				}
+			}
+			return func(target, hitData);
+		}
+
+		inline static REL::Relocation<decltype(thunk)> func;
+	};
+
 	void Install() {
 		REL::Relocation<std::uintptr_t> target{ RELOCATION_ID(43030, 44222), OFFSET_3(0x3CB, 0x79D, 0x3A8) };
 		stl::write_thunk_call<UpdateCombatThreat>(target.address());
-		_loggerInfo("Installed hook.");
+	}
+
+	void InstallDamageResistPatch() {
+		REL::Relocation<std::uintptr_t> target{ REL::ID(38627), 0x4A8 };
+		stl::write_thunk_call<CombatHit>(target.address());
 	}
 }
