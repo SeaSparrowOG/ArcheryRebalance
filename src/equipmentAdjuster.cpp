@@ -110,7 +110,7 @@ namespace AdjustWeapons {
 		const auto& ammoArray = dataHandler->GetFormArray<RE::TESAmmo>();
 		for (auto* ammo : ammoArray) {
 			auto& ammoData = ammo->data;
-			if (ammo->IsBolt()) continue;
+			if (!ammo->data.flags.any(RE::AMMO_DATA::Flag::kNonBolt)) continue;
 			if (!ammo->GetPlayable()) continue;
 			if (ammoData.damage < 1.0f) continue;
 			std::string ammoName = ammo->GetName();
@@ -168,7 +168,7 @@ namespace AdjustWeapons {
 		const auto& ammoArray = dataHandler->GetFormArray<RE::TESAmmo>();
 		for (auto* ammo : ammoArray) {
 			auto& ammoData = ammo->data;
-			if (!ammo->IsBolt()) continue;
+			if (ammo->data.flags.any(RE::AMMO_DATA::Flag::kNonBolt)) continue;
 			if (!ammo->GetPlayable()) continue;
 			if (ammoData.damage < 1.0f) continue;
 			std::string ammoName = ammo->GetName();
@@ -221,13 +221,32 @@ namespace AdjustWeapons {
 		}
 
 		const auto& weaponArray = dataHandler->GetFormArray<RE::TESObjectWEAP>();
+		std::size_t adjustedBowCount = 0;
+
 		for (auto* weapon : weaponArray) {
 			if (!weapon->GetPlayable()) continue;
 			if (!weapon->IsBow()) continue;
 			std::string bowName = weapon->GetName();
-			
+			std::string templateName = weapon->templateWeapon ? weapon->templateWeapon->GetName() : "";
+			bool nameContainsTemplate = templateName.empty() ? false : bowName.contains(templateName);
+
 			weapon->weaponData.speed = 1.0f;
-			if (!bowName.empty()) {
+			adjustedBowCount++;
+
+			if (bowName.empty()) continue;
+
+			if (nameContainsTemplate && std::find(adjustedBows.begin(), adjustedBows.end(), templateName) != adjustedBows.end()) {
+				continue;
+			}
+
+			if (std::find(adjustedBows.begin(), adjustedBows.end(), bowName) != adjustedBows.end()) {
+				continue;
+			}
+
+			if (nameContainsTemplate) {
+				adjustedBows.push_back(templateName);
+			}
+			else {
 				adjustedBows.push_back(bowName);
 			}
 		}
@@ -235,7 +254,7 @@ namespace AdjustWeapons {
 		std::sort(adjustedBows.begin(), adjustedBows.end());
 		_loggerInfo("");
 		_loggerInfo("================================================================");
-		_loggerInfo("Bow Adjustment Report:");
+		_loggerInfo("Bow Adjustment Report (Showing {} out of {} adjusted bows):", adjustedBows.size(), adjustedBowCount);
 		for (auto& bow : adjustedBows) {
 			_loggerInfo("    >{}", bow);
 		}
