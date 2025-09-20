@@ -1,0 +1,15 @@
+string(REGEX REPLACE "^\"|\"$" "" COMPILED_SCRIPTS "${COMPILED_SCRIPTS}")
+string(REGEX REPLACE "^\"|\"$" "" OUTPUT_FOLDER "${OUTPUT_FOLDER}")
+
+file(TO_CMAKE_PATH "${COMPILED_SCRIPTS}" COMPILED_SCRIPTS)
+file(TO_CMAKE_PATH "${OUTPUT_FOLDER}" OUTPUT_FOLDER)
+
+if(EXISTS "${COMPILED_SCRIPTS}")
+    set(DEST_COMPILED "${OUTPUT_FOLDER}/Scripts")
+    message(STATUS "Copying compiled Papyrus scripts from ${COMPILED_SCRIPTS} to ${DEST_COMPILED}")
+    file(REMOVE_RECURSE "${DEST_COMPILED}")
+    file(MAKE_DIRECTORY "${DEST_COMPILED}")
+    file(COPY "${COMPILED_SCRIPTS}/" DESTINATION "${DEST_COMPILED}")
+else()
+    message(STATUS "Compiled Papyrus scripts not found at ${COMPILED_SCRIPTS}, skipping.")
+endif()

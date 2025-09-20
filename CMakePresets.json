@@ -1,10 +1,10 @@
 {
-  "version": 3,
-  "cmakeMinimumRequired": {
-    "major": 3,
-    "minor": 21,
-    "patch": 0
-  },
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
   "configurePresets": [
     {
       "name": "cmake-dev",
@@ -37,49 +37,86 @@
       "toolset": "v143"
     },
     {
-      "name": "se",
-      "hidden": true,
-      "binaryDir": "${sourceDir}/build-15"
-    },
-    {
-      "name": "ae",
+      "name": "release",
       "hidden": true,
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
-        "BUILD_SKYRIMAE": true
+        "FULL_RELEASE": true,
+        "COPY_BSA": true,
+        "COPY_PSC": true
       }
     },
     {
-      "name": "vs2022-windows-vcpkg-se",
-      "inherits": [
-        "cmake-dev",
-        "vcpkg",
-        "windows",
-        "vs2022",
-        "se"
-      ]
+      "name": "test",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build-test",
+      "cacheVariables": {
+        "COPY_PEX": true,
+        "COPY_BSA": true,
+        "COPY_PSC": true
+      }
     },
     {
-      "name": "vs2022-windows-vcpkg-ae",
+      "name": "outdated",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build-outdated",
+      "cacheVariables": {
+        "FULL_RELEASE": true,
+        "OUTDATED": true,
+        "COPY_BSA": true,
+        "COPY_PSC": true
+      }
+    },
+    {
+      "name": "vs2022-windows-vcpkg-release",
       "inherits": [
         "cmake-dev",
         "vcpkg",
         "windows",
         "vs2022",
-        "ae"
-      ]
+        "release"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "Outdated",
+      "inherits": [
+        "cmake-dev",
+        "vcpkg",
+        "windows",
+        "vs2022",
+        "outdated"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "vs2022-windows-vcpkg-test",
+      "inherits": [
+        "cmake-dev",
+        "vcpkg",
+        "windows",
+        "vs2022",
+        "test"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
     }
   ],
-  "buildPresets": [
-    {
-      "name": "Release",
-      "configurePreset": "vs2022-windows-vcpkg-ae",
-      "configuration": "Release"
-    },
-    {
-      "name": "Release - Outdated",
-      "configurePreset": "vs2022-windows-vcpkg-se",
-      "configuration": "Release"
-    }
-  ]
+    "buildPresets": [
+        {
+            "name": "Release",
+            "configurePreset": "vs2022-windows-vcpkg-release",
+            "configuration": "Release"
+        },
+        {
+            "name": "Test",
+            "configurePreset": "vs2022-windows-vcpkg-test",
+            "configuration": "Debug"
+        }
+    ]
 }
