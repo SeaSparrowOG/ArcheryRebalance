@@ -4,10 +4,6 @@
 
 static void MessageEventCallback(SKSE::MessagingInterface::Message* a_msg)
 {
-	static auto* jsonHolder = Settings::JSON::Holder::GetSingleton();
-	if (!jsonHolder) {
-		SKSE::stl::report_and_fail("Failed to get internal JSON logger."sv);
-	}
 
 	switch (a_msg->type) {
 	case SKSE::MessagingInterface::kDataLoaded:
