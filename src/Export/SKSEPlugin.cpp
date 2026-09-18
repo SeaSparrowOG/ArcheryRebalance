@@ -1,3 +1,5 @@
+#include "Hooks/Hooks.h"
+#include "DynamicPatches/RuntimePatches.h"
 #include "Settings/INI/INISettings.h"
 
 #include <spdlog/sinks/basic_file_sink.h>
@@ -39,6 +41,10 @@ static void MessageEventCallback(SKSE::MessagingInterface::Message* a_msg)
 {
 	switch (a_msg->type) {
 	case SKSE::MessagingInterface::kDataLoaded:
+		if (!RuntimePatches::RunPatchers()) {
+			REX::FAIL(
+			fmt::format("Failed to apply the desired runtime patches. Check the log at (Documents/My Games/Skyrim Special Edition/{}.log for more information."sv, Plugin::NAME));
+		}
 		SECTION_SEPARATOR;
 		REX::INFO("Finished startup tasks, enjoy your game!"sv);
 		break;
@@ -88,7 +94,7 @@ SKSE_PLUGIN_LOAD(const SKSE::LoadInterface * a_skse)
 	info.log = true;
 	info.hook = true;
 	info.trampoline = true;
-	info.trampolineSize = 14u;
+	info.trampolineSize = 42;
 	
 	SKSE::Init(a_skse, info);
 	REX::INFO("Author: SeaSparrow"sv);
@@ -114,6 +120,12 @@ SKSE_PLUGIN_LOAD(const SKSE::LoadInterface * a_skse)
 	}
 
 	REX::INFO("Performing startup tasks..."sv);
+
+	if (!Hooks::Install()) {
+		REX::FAIL(
+			fmt::format("Failed to install the necessary hooks. Check the log at (Documents/My Games/Skyrim Special Edition/{}.log for more information."sv, Plugin::NAME)
+		);
+	}
 
 	const auto messaging = SKSE::GetMessagingInterface();
 	messaging->RegisterListener(&MessageEventCallback);
