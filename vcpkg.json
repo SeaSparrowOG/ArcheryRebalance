@@ -5,11 +5,9 @@
   "homepage": "https://github.com/SeaSparrowOG/ArcheryRebalance",
   "license": "GPL-3.0",
   "dependencies": [
-    "boost-stl-interfaces",
+    "commonlib-shared",
     "clib-util",
-    "fmt",
-    "rsm-binary-io",
-    "spdlog",
+    "magic-enum",
     "xbyak"
   ],
   "builtin-baseline": "eae1680538b86f962455c27abca2aad0dc304a4d"

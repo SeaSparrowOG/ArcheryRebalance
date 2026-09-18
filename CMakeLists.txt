@@ -129,8 +129,8 @@ if(DEFINED OUTPUT_FOLDER)
 			-DDST_DIR=${OUTPUT_FOLDER}
 			-DPROJECT_NAME=${PROJECT_NAME}
 			-P "${PROJECT_SOURCE_DIR}/CMake/Scripts/CMake-Copy-Artifacts.cmake"
-	)
-	
+	)	
+
 	
 	message(STATUS "==== Build Configuration ====")
 	message(STATUS "FULL_RELEASE      = ${FULL_RELEASE}")
