@@ -143,16 +143,16 @@ namespace RuntimePatches
         adjustBoltSpeedBy = std::clamp(adjustBoltSpeedBy, -1000.0f, 5000.0f);
 
         if (adjustBoltDamageBy != 0.0f) {
-            adjustments.boltSpeedModifier = adjustBoltDamageBy;
+            adjustments.boltDamageModifier = adjustBoltDamageBy;
         }
         if (adjustBoltSpeedBy != 0.0f) {
             adjustments.boltSpeedModifier = adjustBoltSpeedBy;
         }
         if (adjustArrowDamageBy != 0.0f) {
-            adjustments.boltSpeedModifier = adjustArrowDamageBy;
+            adjustments.arrowDamageModifier = adjustArrowDamageBy;
         }
         if (adjustArrowSpeedBy != 0.0f) {
-            adjustments.boltSpeedModifier = adjustArrowSpeedBy;
+            adjustments.arrowSpeedModifier = adjustArrowSpeedBy;
         }
 
         bool success = PatchItems(adjustments);
