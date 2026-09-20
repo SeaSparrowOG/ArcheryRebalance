@@ -96,22 +96,22 @@ namespace RuntimePatches
     bool PatchSettings() {
         using Tweak = std::pair<std::string_view, float>;
         constexpr std::array<Tweak, 5> tweaks = {
-            Tweak("Combat|f1PArrowTiltUpAngle"sv, 0.2f),
-            Tweak("Combat|f1PboltTiltUpAngle"sv, 0.2f),
-            Tweak("Combat|f3PArrowTiltUpAngle"sv, 0.7f),
-            Tweak("Combat|fMagnetismStrafeHeadingMult"sv, 0.0f),
-            Tweak("Combat|fMagnetismLookingMult"sv, 0.0f)
+            Tweak("f1PArrowTiltUpAngle:Combat"sv, 0.2f),
+            Tweak("f1PBoltTiltUpAngle:Combat"sv, 0.2f),
+            Tweak("f3PArrowTiltUpAngle:Combat"sv, 0.7f),
+            Tweak("fMagnetismStrafeHeadingMult:Combat"sv, 0.0f),
+            Tweak("fMagnetismLookingMult:Combat"sv, 0.0f)
         };
 
-        REX::INFO("  - Patching game settings..."sv);
-        auto* gameSettings = RE::GameSettingCollection::GetSingleton();
-        if (!gameSettings) {
-            REX::CRITICAL("    >Failed to get the game's internal game settings."sv);
+        REX::INFO("  - Patching game INI settings..."sv);
+        auto* iniSettings = RE::INISettingCollection::GetSingleton();
+        if (!iniSettings) {
+            REX::CRITICAL("    >Failed to get the game's internal INI settings."sv);
             return false;
         }
         for (const auto& tweak : tweaks) {
             REX::INFO("    >Setting {} to {}..."sv, tweak.first, tweak.second);
-            auto* setting = gameSettings->GetSetting(tweak.first.data());
+            auto* setting = iniSettings->GetSetting(tweak.first.data());
             if (!setting) {
                 REX::WARN("      - Failed to find the setting."sv);
                 continue;
