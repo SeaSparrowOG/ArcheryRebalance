@@ -108,7 +108,7 @@ SKSE_PLUGIN_LOAD(const SKSE::LoadInterface * a_skse)
 		SKSE::RUNTIME_SSE_1_7_99
 	};
 
-	if (!std::ranges::contains(supported, ver)) {
+	if ((ver < SKSE::RUNTIME_SSE_LATEST) && (!std::ranges::contains(supported, ver))) {
 		REX::CRITICAL("Game Version: {}"sv, ver.string());
 		REX::CRITICAL("Supported Versions:"sv);
 		for (const auto& allowed : supported) {

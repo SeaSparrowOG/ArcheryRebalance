@@ -34,9 +34,7 @@ namespace RuntimePatches
         const bool skipArrows = !adjustments.arrowDamageModifier.has_value() &&
             !adjustments.arrowSpeedModifier.has_value();
 
-        std::unordered_map<RE::BGSProjectile*, RE::TESAmmo*> patchedProjectiles;
-        int preventedStackingCount = 0;
-
+        std::unordered_set<RE::BGSProjectile*> patchedProjectiles;
         for (auto* ammo : allAmmo) {
             if (!ammo || !ammo->GetPlayable()) {
                 continue;
@@ -59,37 +57,19 @@ namespace RuntimePatches
             if (isBolt && !skipBolts && adjustments.boltSpeedModifier.has_value()) {
                 if (!patchedProjectiles.contains(proj)) {
                     proj->data.speed += adjustments.boltSpeedModifier.value();
-                    patchedProjectiles[proj] = ammo;
-                }
-                else {
-                    auto* originalAmmo = patchedProjectiles[proj];
-                    REX::INFO("      > Prevented speed stack on Bolt Projectile [{:08X}] {} (Shared by Ammos: [{:08X}] {} and [{:08X}] {})",
-                        proj->GetFormID(), clib_util::editorID::get_editorID(proj),
-                        ammo->GetFormID(), ammo->GetName(),
-                        originalAmmo->GetFormID(), originalAmmo->GetName());
-                    preventedStackingCount++;
+                    patchedProjectiles.emplace(proj);
                 }
             }
             else if (!isBolt && !skipArrows && adjustments.arrowSpeedModifier.has_value()) {
                 if (!patchedProjectiles.contains(proj)) {
                     proj->data.speed += adjustments.arrowSpeedModifier.value();
-                    patchedProjectiles[proj] = ammo;
+                    patchedProjectiles.emplace(proj);
                 }
                 else {
-                    auto* originalAmmo = patchedProjectiles[proj];
-                    REX::INFO("      > Prevented speed stack on Arrow Projectile [{:08X}] {} (Shared by Ammos: [{:08X}] {} and [{:08X}] {})",
-                        proj->GetFormID(), clib_util::editorID::get_editorID(proj),
-                        ammo->GetFormID(), ammo->GetName(),
-                        originalAmmo->GetFormID(), originalAmmo->GetName());
-                    preventedStackingCount++;
+                    patchedProjectiles.emplace(proj);
                 }
             }
         }
-
-        if (preventedStackingCount > 0) {
-            REX::INFO("    > Total shared projectiles prevented from double-buffing: {}", preventedStackingCount);
-        }
-
         return true;
     }
 
