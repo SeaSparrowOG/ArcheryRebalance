@@ -30,9 +30,12 @@ namespace RuntimePatches
         }
 
         const bool skipBolts = !adjustments.boltDamageModifier.has_value() &&
-                                !adjustments.boltSpeedModifier.has_value();
-        const bool skipArrows = !adjustments.arrowDamageModifier.has_value() && 
-                                !adjustments.arrowSpeedModifier.has_value();
+            !adjustments.boltSpeedModifier.has_value();
+        const bool skipArrows = !adjustments.arrowDamageModifier.has_value() &&
+            !adjustments.arrowSpeedModifier.has_value();
+
+        std::unordered_map<RE::BGSProjectile*, RE::TESAmmo*> patchedProjectiles;
+        int preventedStackingCount = 0;
 
         for (auto* ammo : allAmmo) {
             if (!ammo || !ammo->GetPlayable()) {
@@ -43,45 +46,72 @@ namespace RuntimePatches
                 continue;
             }
             const bool isBolt = ammo->IsBolt();
-            if (isBolt && !skipBolts) {
-                if (adjustments.boltDamageModifier.has_value()) {
-                    ammo->data.damage += adjustments.boltDamageModifier.value();
-                }
-                if (adjustments.boltSpeedModifier.has_value()) {
+
+            // Apply Damage
+            if (isBolt && !skipBolts && adjustments.boltDamageModifier.has_value()) {
+                ammo->data.damage += adjustments.boltDamageModifier.value();
+            }
+            else if (!isBolt && !skipArrows && adjustments.arrowDamageModifier.has_value()) {
+                ammo->data.damage += adjustments.arrowDamageModifier.value();
+            }
+
+            // Apply Speed and Log Collisions
+            if (isBolt && !skipBolts && adjustments.boltSpeedModifier.has_value()) {
+                if (!patchedProjectiles.contains(proj)) {
                     proj->data.speed += adjustments.boltSpeedModifier.value();
+                    patchedProjectiles[proj] = ammo;
+                }
+                else {
+                    auto* originalAmmo = patchedProjectiles[proj];
+                    REX::INFO("      > Prevented speed stack on Bolt Projectile [{:08X}] {} (Shared by Ammos: [{:08X}] {} and [{:08X}] {})",
+                        proj->GetFormID(), clib_util::editorID::get_editorID(proj),
+                        ammo->GetFormID(), ammo->GetName(),
+                        originalAmmo->GetFormID(), originalAmmo->GetName());
+                    preventedStackingCount++;
                 }
             }
-            else if (!isBolt && !skipArrows) {
-                if (adjustments.arrowDamageModifier.has_value()) {
-                    ammo->data.damage += adjustments.arrowDamageModifier.value();
-                }
-                if (adjustments.arrowSpeedModifier.has_value()) {
+            else if (!isBolt && !skipArrows && adjustments.arrowSpeedModifier.has_value()) {
+                if (!patchedProjectiles.contains(proj)) {
                     proj->data.speed += adjustments.arrowSpeedModifier.value();
+                    patchedProjectiles[proj] = ammo;
+                }
+                else {
+                    auto* originalAmmo = patchedProjectiles[proj];
+                    REX::INFO("      > Prevented speed stack on Arrow Projectile [{:08X}] {} (Shared by Ammos: [{:08X}] {} and [{:08X}] {})",
+                        proj->GetFormID(), clib_util::editorID::get_editorID(proj),
+                        ammo->GetFormID(), ammo->GetName(),
+                        originalAmmo->GetFormID(), originalAmmo->GetName());
+                    preventedStackingCount++;
                 }
             }
         }
+
+        if (preventedStackingCount > 0) {
+            REX::INFO("    > Total shared projectiles prevented from double-buffing: {}", preventedStackingCount);
+        }
+
         return true;
     }
 
     bool PatchSettings() {
         using Tweak = std::pair<std::string_view, float>;
         constexpr std::array<Tweak, 5> tweaks = {
-            Tweak("Combat|f1PArrowTiltUpAngle"sv, 0.2f),
-            Tweak("Combat|f1PboltTiltUpAngle"sv, 0.2f),
-            Tweak("Combat|f3PArrowTiltUpAngle"sv, 0.7f),
-            Tweak("Combat|fMagnetismStrafeHeadingMult"sv, 0.0f),
-            Tweak("Combat|fMagnetismLookingMult"sv, 0.0f)
+            Tweak("f1PArrowTiltUpAngle:Combat"sv, 0.2f),
+            Tweak("f1PBoltTiltUpAngle:Combat"sv, 0.2f),
+            Tweak("f3PArrowTiltUpAngle:Combat"sv, 0.7f),
+            Tweak("fMagnetismStrafeHeadingMult:Combat"sv, 0.0f),
+            Tweak("fMagnetismLookingMult:Combat"sv, 0.0f)
         };
 
-        REX::INFO("  - Patching game settings..."sv);
-        auto* gameSettings = RE::GameSettingCollection::GetSingleton();
-        if (!gameSettings) {
-            REX::CRITICAL("    >Failed to get the game's internal game settings."sv);
+        REX::INFO("  - Patching game INI settings..."sv);
+        auto* iniSettings = RE::INISettingCollection::GetSingleton();
+        if (!iniSettings) {
+            REX::CRITICAL("    >Failed to get the game's internal INI settings."sv);
             return false;
         }
         for (const auto& tweak : tweaks) {
             REX::INFO("    >Setting {} to {}..."sv, tweak.first, tweak.second);
-            auto* setting = gameSettings->GetSetting(tweak.first.data());
+            auto* setting = iniSettings->GetSetting(tweak.first.data());
             if (!setting) {
                 REX::WARN("      - Failed to find the setting."sv);
                 continue;
@@ -113,16 +143,16 @@ namespace RuntimePatches
         adjustBoltSpeedBy = std::clamp(adjustBoltSpeedBy, -1000.0f, 5000.0f);
 
         if (adjustBoltDamageBy != 0.0f) {
-            adjustments.boltSpeedModifier = adjustBoltDamageBy;
+            adjustments.boltDamageModifier = adjustBoltDamageBy;
         }
         if (adjustBoltSpeedBy != 0.0f) {
             adjustments.boltSpeedModifier = adjustBoltSpeedBy;
         }
         if (adjustArrowDamageBy != 0.0f) {
-            adjustments.boltSpeedModifier = adjustArrowDamageBy;
+            adjustments.arrowDamageModifier = adjustArrowDamageBy;
         }
         if (adjustArrowSpeedBy != 0.0f) {
-            adjustments.boltSpeedModifier = adjustArrowSpeedBy;
+            adjustments.arrowSpeedModifier = adjustArrowSpeedBy;
         }
 
         bool success = PatchItems(adjustments);
