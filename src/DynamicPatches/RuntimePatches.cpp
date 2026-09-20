@@ -30,9 +30,12 @@ namespace RuntimePatches
         }
 
         const bool skipBolts = !adjustments.boltDamageModifier.has_value() &&
-                                !adjustments.boltSpeedModifier.has_value();
-        const bool skipArrows = !adjustments.arrowDamageModifier.has_value() && 
-                                !adjustments.arrowSpeedModifier.has_value();
+            !adjustments.boltSpeedModifier.has_value();
+        const bool skipArrows = !adjustments.arrowDamageModifier.has_value() &&
+            !adjustments.arrowSpeedModifier.has_value();
+
+        std::unordered_map<RE::BGSProjectile*, RE::TESAmmo*> patchedProjectiles;
+        int preventedStackingCount = 0;
 
         for (auto* ammo : allAmmo) {
             if (!ammo || !ammo->GetPlayable()) {
@@ -43,23 +46,50 @@ namespace RuntimePatches
                 continue;
             }
             const bool isBolt = ammo->IsBolt();
-            if (isBolt && !skipBolts) {
-                if (adjustments.boltDamageModifier.has_value()) {
-                    ammo->data.damage += adjustments.boltDamageModifier.value();
-                }
-                if (adjustments.boltSpeedModifier.has_value()) {
+
+            // Apply Damage
+            if (isBolt && !skipBolts && adjustments.boltDamageModifier.has_value()) {
+                ammo->data.damage += adjustments.boltDamageModifier.value();
+            }
+            else if (!isBolt && !skipArrows && adjustments.arrowDamageModifier.has_value()) {
+                ammo->data.damage += adjustments.arrowDamageModifier.value();
+            }
+
+            // Apply Speed and Log Collisions
+            if (isBolt && !skipBolts && adjustments.boltSpeedModifier.has_value()) {
+                if (!patchedProjectiles.contains(proj)) {
                     proj->data.speed += adjustments.boltSpeedModifier.value();
+                    patchedProjectiles[proj] = ammo;
+                }
+                else {
+                    auto* originalAmmo = patchedProjectiles[proj];
+                    REX::INFO("      > Prevented speed stack on Bolt Projectile [{:08X}] {} (Shared by Ammos: [{:08X}] {} and [{:08X}] {})",
+                        proj->GetFormID(), clib_util::editorID::get_editorID(proj),
+                        ammo->GetFormID(), ammo->GetName(),
+                        originalAmmo->GetFormID(), originalAmmo->GetName());
+                    preventedStackingCount++;
                 }
             }
-            else if (!isBolt && !skipArrows) {
-                if (adjustments.arrowDamageModifier.has_value()) {
-                    ammo->data.damage += adjustments.arrowDamageModifier.value();
-                }
-                if (adjustments.arrowSpeedModifier.has_value()) {
+            else if (!isBolt && !skipArrows && adjustments.arrowSpeedModifier.has_value()) {
+                if (!patchedProjectiles.contains(proj)) {
                     proj->data.speed += adjustments.arrowSpeedModifier.value();
+                    patchedProjectiles[proj] = ammo;
+                }
+                else {
+                    auto* originalAmmo = patchedProjectiles[proj];
+                    REX::INFO("      > Prevented speed stack on Arrow Projectile [{:08X}] {} (Shared by Ammos: [{:08X}] {} and [{:08X}] {})",
+                        proj->GetFormID(), clib_util::editorID::get_editorID(proj),
+                        ammo->GetFormID(), ammo->GetName(),
+                        originalAmmo->GetFormID(), originalAmmo->GetName());
+                    preventedStackingCount++;
                 }
             }
         }
+
+        if (preventedStackingCount > 0) {
+            REX::INFO("    > Total shared projectiles prevented from double-buffing: {}", preventedStackingCount);
+        }
+
         return true;
     }
 
