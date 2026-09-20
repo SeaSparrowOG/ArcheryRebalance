@@ -4,7 +4,7 @@
 #include "SKSE/SKSE.h"
 #include "REX/REX.h"
 
-#include <expected>>
+#include <expected>
 #include <unordered_set>
 #include <fstream>
 #include <spdlog/sinks/basic_file_sink.h>
